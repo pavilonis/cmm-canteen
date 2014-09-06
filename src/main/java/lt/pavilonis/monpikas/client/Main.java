@@ -4,6 +4,7 @@ import javafx.animation.PathTransition;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ClosePath;
 import javafx.scene.shape.LineTo;
@@ -24,6 +25,7 @@ public class Main extends Application {
       Group root = new Group();
       Scene scene = new Scene(root, 1440, 900, Color.WHITE);
 
+
 //      Image img = new Image(loader.getResource("images/nophoto.png").toString(), false);
 //      ImageView imgView = new ImageView(img);
 //      DropShadow ds = new DropShadow(10, 5, 5, Color.DARKGRAY);
@@ -39,17 +41,34 @@ public class Main extends Application {
       //g.getChildren().add(r);
       //g.getChildren().add(r2);
 
-      UserInfoBig uib = new UserInfoBig(new User("Ivanas Ivanauskas Ivanovicius", true, LocalDateTime.now()));
-      UserInfoSmall uis = new UserInfoSmall(new User("Ivanas Ivanauskas", true, LocalDateTime.now()));
+      CardBig uib = context.getBean(CardBig.class);
+      uib.initialize();
+      uib.updateUserInfo(new User("Ivanas Ivanauskas Ivanovicius", true, LocalDateTime.now()));
+
+      CardSmall uis = context.getBean(CardSmall.class);
+      uis.initialize();
+      uis.updateUserInfo(new User("Ivanas Ėčęą„ūųšė Ivanovičius", true, LocalDateTime.now()));
 
       Path p = new Path(new MoveTo(440, 115), new LineTo(440, 760), new ClosePath());
+//      TranslateTransition tt  = new TranslateTransition(Duration.seconds(3), uis);
+//      tt.setFromX(0);
+//      tt.setFromY(115);
+//      tt.setToX(0);
+//      tt.setToY(760);
+//      tt.setCycleCount(20);
+//      tt.setAutoReverse(true);
+//      tt.setInterpolator(Interpolator.EASE_IN);
+//      tt.play();
       PathTransition pt = new PathTransition(Duration.seconds(10), p, uis);
       pt.setCycleCount(20);
       pt.setAutoReverse(true);
       pt.play();
 
       root.getChildren().addAll(uib, uis);
-
+      stage.addEventHandler(KeyEvent.KEY_TYPED, (KeyEvent k) -> {
+         uib.updateUserInfo(new User("Stepanas Stepanovicius", true, LocalDateTime.now()));
+         System.out.println("name changed");
+      });
       stage.setScene(scene);
       stage.show();
    }
