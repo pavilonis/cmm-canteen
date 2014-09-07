@@ -20,7 +20,7 @@ public class CardSmall extends Card {
    protected void initialize() {
 
       super.initialize();
-      setLayoutX(605);
+      setLayoutX(610);
       setLayoutY(20);
 
       grid.setPadding(new Insets(20));
@@ -56,5 +56,16 @@ public class CardSmall extends Card {
       getChildren().add(outerRect);
       getChildren().add(innerRect);
       getChildren().add(grid);
+   }
+
+   @Override
+   protected void animateUpdate(User user) {
+      double originY = getTranslateY();
+      translate.setToY(230);
+      translate.setOnFinished(event -> {
+         setTranslateY(originY);
+         update(user);
+      });
+      translate.play();
    }
 }

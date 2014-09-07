@@ -1,5 +1,6 @@
 package lt.pavilonis.monpikas.client;
 
+import javafx.animation.ScaleTransition;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -33,6 +34,7 @@ public class CardBig extends Card {
    private final SVGPath ICON_STATUS_OK = new SVGPath();
    private final SVGPath ICON_STATUS_REJECT = new SVGPath();
    private final FlowPane FLOW_PANE = new FlowPane();
+   private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION, this);
 
    public CardBig() {
    }
@@ -101,7 +103,7 @@ public class CardBig extends Card {
    }
 
    @Override
-   public void updateUserInfo(User user) {
+   protected void update(User user) {
       FLOW_PANE.getChildren().clear();
       if (!checkIfDinnerAllowed(user)) {
          REJECT_TEXT.setText(
@@ -113,5 +115,31 @@ public class CardBig extends Card {
       } else {
          FLOW_PANE.getChildren().add(ICON_STATUS_OK);
       }
+   }
+
+   @Override
+   protected void animateUpdate(User user) {
+      double originX = getTranslateX();
+      double originY = getTranslateY();
+      translate.setToX(703);
+      translate.setToY(-328);
+      scale.setToX(1.4);
+      scale.setToY(.245);
+      fade.setFromValue(1);
+      fade.setToValue(0);
+      fade.setOnFinished(event -> {
+         setScaleX(1);
+         setScaleY(1);
+         setTranslateX(originX);
+         setTranslateY(originY);
+         update(user);
+         fade.setOnFinished(null);
+         fade.setFromValue(0);
+         fade.setToValue(1);
+         fade.play();
+      });
+      scale.play();
+      translate.play();
+      fade.play();
    }
 }
