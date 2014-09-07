@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
@@ -11,6 +11,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+import lt.pavilonis.monpikas.client.User;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
@@ -28,7 +29,7 @@ public abstract class Card extends Group {
    FadeTransition fade = new FadeTransition(ANIMATION_DURATION, this);
    TranslateTransition translate = new TranslateTransition(ANIMATION_DURATION, this);
 
-   protected void initialize() {
+   public void initialize() {
       ICON_NO_PHOTO.setContent(ICON_NO_PHOTO_CONTENT);
       ICON_NO_PHOTO.setStroke(Color.DARKGREY);
       ICON_NO_PHOTO.setFill(Color.LIGHTGRAY);
@@ -46,7 +47,7 @@ public abstract class Card extends Group {
       fade.setInterpolator(Interpolator.EASE_IN);
    }
 
-   protected void updateUserInfo(User user) {
+   public void updateUserInfo(User user) {
       if (userIsSet()) {
          animateUpdate(user);
       } else {

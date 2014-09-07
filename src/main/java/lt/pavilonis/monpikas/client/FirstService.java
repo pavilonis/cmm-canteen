@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client.services;
+package lt.pavilonis.monpikas.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

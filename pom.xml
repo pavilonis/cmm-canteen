@@ -56,7 +56,7 @@
                <archive>
                   <manifest>
                      <addClasspath>true</addClasspath>
-                     <mainClass>lt.pavilonis.monpikas.client.Main</mainClass>
+                     <mainClass>lt.pavilonis.monpikas.client.App</mainClass>
                   </manifest>
                </archive>
             </configuration>

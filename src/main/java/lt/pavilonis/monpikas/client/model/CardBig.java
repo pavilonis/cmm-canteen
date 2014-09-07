@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.ScaleTransition;
 import javafx.geometry.HPos;
@@ -12,6 +12,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import lt.pavilonis.monpikas.client.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,7 @@ public class CardBig extends Card {
    }
 
    @Override
-   protected void initialize() {
+   public void initialize() {
 
       super.initialize();
       setLayoutX(20);

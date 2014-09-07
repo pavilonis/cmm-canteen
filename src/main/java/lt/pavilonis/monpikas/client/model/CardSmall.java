@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.monpikas.client.model;
 
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -6,6 +6,7 @@ import javafx.geometry.VPos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
+import lt.pavilonis.monpikas.client.User;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -17,17 +18,17 @@ public class CardSmall extends Card {
    }
 
    @Override
-   protected void initialize() {
+   public void initialize() {
 
       super.initialize();
-      setLayoutX(610);
+      setLayoutX(620);
       setLayoutY(20);
 
       grid.setPadding(new Insets(20));
       grid.setHgap(10);
 
       ColumnConstraints ccLeft = new ColumnConstraints(142.5);
-      ColumnConstraints ccRight = new ColumnConstraints(667.5);
+      ColumnConstraints ccRight = new ColumnConstraints(657.5);
       ccLeft.setHalignment(HPos.CENTER);
       ccRight.setHalignment(HPos.CENTER);
       grid.getColumnConstraints().addAll(ccLeft, ccRight);
@@ -45,12 +46,12 @@ public class CardSmall extends Card {
       nameText.setFont(Font.font("SansSerif", 60));
       grid.add(nameText, 1, 0);
 
-      outerRect.setWidth(810);
+      outerRect.setWidth(800);
       outerRect.setHeight(210);
 
       innerRect.setX(10);
       innerRect.setY(10);
-      innerRect.setWidth(790);
+      innerRect.setWidth(780);
       innerRect.setHeight(190);
 
       getChildren().add(outerRect);
