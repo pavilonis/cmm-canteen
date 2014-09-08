@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class FirstService {
+public class UserRequestService {
 
    @Autowired
    private RestTemplate rt;
