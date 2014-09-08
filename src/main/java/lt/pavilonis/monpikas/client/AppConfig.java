@@ -13,8 +13,8 @@ import org.springframework.web.client.RestTemplate;
 public class AppConfig {
 
    @Bean
-   public FirstService firstService() {
-      return new FirstService();
+   public UserRequestService firstService() {
+      return new UserRequestService();
    }
 
    @Bean

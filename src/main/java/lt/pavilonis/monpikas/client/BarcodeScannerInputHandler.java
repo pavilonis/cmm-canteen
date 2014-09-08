@@ -17,6 +17,7 @@ public class BarcodeScannerInputHandler implements EventHandler<KeyEvent> {
    private final long INPUT_PAUSE = 50;
    private final int CORRECTION = 2;
    private long lastInput;
+   private StringBuilder barcode = new StringBuilder();
 
    @Override
    public void handle(KeyEvent event) {
@@ -31,9 +32,11 @@ public class BarcodeScannerInputHandler implements EventHandler<KeyEvent> {
       if (Character.isDigit(c)) {
          digits.add(Character.getNumericValue(c));
          if (digits.size() == 4) {
-            digits.forEach(d -> digits.set(digits.indexOf(d), correct(d)));
-            listenerController.requestUser(digits);
-            digits.clear(); //TODO maybe digits should be cleared before controller call
+            //digits.forEach(d -> digits.set(digits.indexOf(d), correct(d)));
+            barcode.setLength(0);
+            digits.forEach(barcode::append);
+            listenerController.scanEventAction(barcode.toString());
+            digits.clear(); //TODO maybe digits should be cleared BEFORE controller call
          }
       }
       lastInput = now;

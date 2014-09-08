@@ -1,6 +1,7 @@
 package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.ScaleTransition;
+import javafx.animation.Transition;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -16,14 +17,17 @@ import lt.pavilonis.monpikas.client.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Component
 public class CardBig extends Card {
 
-   @Value("${Card.Message.NoPermission}")
-   private String NO_PERMISSION_MSG;
+   //@Value("${Card.Message.NoPermission}")
+   private String NO_PERMISSION_MSG = "NĖRA LEIDIMO";
 
-   @Value("${Card.Message.AlreadyHadDinner}")
-   private String ALREADY_HAD_DINNER_MSG;
+   //@Value("${Card.Message.AlreadyHadDinner}")
+   private String ALREADY_HAD_DINNER_MSG = "JAU VALGĖ";
 
    @Value("${Card.Icon.StatusOkContent}")
    private String ICON_STATUS_OK_CONTENT;
@@ -36,9 +40,6 @@ public class CardBig extends Card {
    private final SVGPath ICON_STATUS_REJECT = new SVGPath();
    private final FlowPane FLOW_PANE = new FlowPane();
    private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION, this);
-
-   public CardBig() {
-   }
 
    @Override
    public void initialize() {
@@ -95,7 +96,7 @@ public class CardBig extends Card {
       innerRect.setHeight(820);
 
       FLOW_PANE.setAlignment(Pos.CENTER);
-      FLOW_PANE.setHgap(50);
+      FLOW_PANE.setHgap(60);
       grid.add(FLOW_PANE, 0, 2);
 
       getChildren().add(outerRect);
@@ -142,5 +143,10 @@ public class CardBig extends Card {
       scale.play();
       translate.play();
       fade.play();
+   }
+
+   @Override
+   public List<Transition> getTransitions() {
+      return Arrays.asList(scale, fade, translate);
    }
 }

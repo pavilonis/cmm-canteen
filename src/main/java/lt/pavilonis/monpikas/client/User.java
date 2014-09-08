@@ -13,6 +13,11 @@ public class User {
       this.lastDinner = lastDinner;
    }
 
+   @Override
+   public String toString() {
+      return "User: "+name+ ", DinnerPerm: "+dinnerPermission+", LastDinner: "+lastDinner;
+   }
+
    public String getName() {
       return name;
    }

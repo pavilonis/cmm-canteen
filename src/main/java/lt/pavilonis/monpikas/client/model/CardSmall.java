@@ -14,15 +14,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CardSmall extends Card {
 
-   public CardSmall() {
-   }
-
    @Override
    public void initialize() {
 
       super.initialize();
       setLayoutX(620);
-      setLayoutY(20);
 
       grid.setPadding(new Insets(20));
       grid.setHgap(10);
@@ -33,7 +29,7 @@ public class CardSmall extends Card {
       ccRight.setHalignment(HPos.CENTER);
       grid.getColumnConstraints().addAll(ccLeft, ccRight);
 
-      RowConstraints rc = new RowConstraints(190);
+      RowConstraints rc = new RowConstraints(180);
       rc.setValignment(VPos.CENTER);
       grid.getRowConstraints().add(rc);
 
@@ -47,12 +43,12 @@ public class CardSmall extends Card {
       grid.add(nameText, 1, 0);
 
       outerRect.setWidth(800);
-      outerRect.setHeight(210);
+      outerRect.setHeight(200);
 
       innerRect.setX(10);
       innerRect.setY(10);
       innerRect.setWidth(780);
-      innerRect.setHeight(190);
+      innerRect.setHeight(180);
 
       getChildren().add(outerRect);
       getChildren().add(innerRect);

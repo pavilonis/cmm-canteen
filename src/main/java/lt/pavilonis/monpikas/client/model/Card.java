@@ -2,6 +2,7 @@ package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
+import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
 import javafx.scene.Group;
 import javafx.scene.effect.DropShadow;
@@ -15,6 +16,8 @@ import lt.pavilonis.monpikas.client.User;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class Card extends Group {
 
@@ -30,6 +33,7 @@ public abstract class Card extends Group {
    TranslateTransition translate = new TranslateTransition(ANIMATION_DURATION, this);
 
    public void initialize() {
+      setVisible(false);
       ICON_NO_PHOTO.setContent(ICON_NO_PHOTO_CONTENT);
       ICON_NO_PHOTO.setStroke(Color.DARKGREY);
       ICON_NO_PHOTO.setFill(Color.LIGHTGRAY);
@@ -52,7 +56,12 @@ public abstract class Card extends Group {
          animateUpdate(user);
       } else {
          update(user);
+         setVisible(true);
       }
+   }
+
+   public List<Transition> getTransitions() {
+      return Arrays.asList(translate, fade);
    }
 
    protected abstract void animateUpdate(User user);
