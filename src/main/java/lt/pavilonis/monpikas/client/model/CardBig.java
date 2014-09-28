@@ -2,6 +2,8 @@ package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
+import javafx.application.Platform;
+import javafx.concurrent.Service;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -13,7 +15,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import lt.pavilonis.monpikas.client.User;
+import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,11 +25,11 @@ import java.util.List;
 @Component
 public class CardBig extends Card {
 
-   //@Value("${Card.Message.NoPermission}")
-   private String NO_PERMISSION_MSG = "NĖRA LEIDIMO";
+   @Value("${Card.Message.NoPermission}")
+   private String NO_PERMISSION_MSG;
 
-   //@Value("${Card.Message.AlreadyHadDinner}")
-   private String ALREADY_HAD_DINNER_MSG = "JAU VALGĖ";
+   @Value("${Card.Message.AlreadyHadDinner}")
+   private String ALREADY_HAD_DINNER_MSG;
 
    @Value("${Card.Icon.StatusOkContent}")
    private String ICON_STATUS_OK_CONTENT;
@@ -38,7 +40,7 @@ public class CardBig extends Card {
    private final Text REJECT_TEXT = new Text();
    private final SVGPath ICON_STATUS_OK = new SVGPath();
    private final SVGPath ICON_STATUS_REJECT = new SVGPath();
-   private final FlowPane FLOW_PANE = new FlowPane();
+   private final FlowPane STATUS_MSG_FLOW_PANE = new FlowPane();
    private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION, this);
 
    @Override
@@ -80,7 +82,7 @@ public class CardBig extends Card {
       rcBottom.setValignment(VPos.CENTER);
 
       grid.getRowConstraints().addAll(rcTop, rcMiddle, rcBottom);
-      grid.add(ICON_NO_PHOTO, 0, 0);
+      grid.add(PHOTO_CONTAINER, 0, 0);
 
       nameText.setWrappingWidth(540);
       nameText.setFont(Font.font("SansSerif", 70));
@@ -95,9 +97,9 @@ public class CardBig extends Card {
       innerRect.setWidth(540);
       innerRect.setHeight(820);
 
-      FLOW_PANE.setAlignment(Pos.CENTER);
-      FLOW_PANE.setHgap(60);
-      grid.add(FLOW_PANE, 0, 2);
+      STATUS_MSG_FLOW_PANE.setAlignment(Pos.CENTER);
+      STATUS_MSG_FLOW_PANE.setHgap(60);
+      grid.add(STATUS_MSG_FLOW_PANE, 0, 2);
 
       getChildren().add(outerRect);
       getChildren().add(innerRect);
@@ -105,22 +107,22 @@ public class CardBig extends Card {
    }
 
    @Override
-   protected void update(User user) {
-      FLOW_PANE.getChildren().clear();
-      if (!checkIfDinnerAllowed(user)) {
+   protected void update(ClientPupilDto dto) {
+      STATUS_MSG_FLOW_PANE.getChildren().clear();
+      if (!checkIfDinnerAllowed(dto)) {
          REJECT_TEXT.setText(
-               (!user.isDinnerPermission())
+               (!dto.isDinnerPermitted())
                      ? NO_PERMISSION_MSG
                      : ALREADY_HAD_DINNER_MSG
          );
-         FLOW_PANE.getChildren().addAll(ICON_STATUS_REJECT, REJECT_TEXT);
+         STATUS_MSG_FLOW_PANE.getChildren().addAll(ICON_STATUS_REJECT, REJECT_TEXT);
       } else {
-         FLOW_PANE.getChildren().add(ICON_STATUS_OK);
+         STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
       }
    }
 
    @Override
-   protected void animateUpdate(User user) {
+   protected void animate(ClientPupilDto dto) {
       double originX = getTranslateX();
       double originY = getTranslateY();
       translate.setToX(703);
@@ -134,11 +136,14 @@ public class CardBig extends Card {
          setScaleY(1);
          setTranslateX(originX);
          setTranslateY(originY);
-         update(user);
-         fade.setOnFinished(null);
+         update(dto);
          fade.setFromValue(0);
          fade.setToValue(1);
          fade.play();
+         fade.setOnFinished(event2 -> {
+            Platform.runLater(()->setPhoto(dto.getCardId()));
+            fade.setOnFinished(null);
+         });
       });
       scale.play();
       translate.play();
@@ -149,4 +154,14 @@ public class CardBig extends Card {
    public List<Transition> getTransitions() {
       return Arrays.asList(scale, fade, translate);
    }
+//
+//   @Override
+//   protected boolean setPhoto(String id) {
+//      if (super.setPhoto(id)) {
+//         userPhoto
+//      } else {
+//         return false;
+//      }
+//
+//   }
 }

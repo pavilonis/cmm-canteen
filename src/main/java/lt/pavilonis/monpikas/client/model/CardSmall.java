@@ -1,12 +1,13 @@
 package lt.pavilonis.monpikas.client.model;
 
+import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
-import lt.pavilonis.monpikas.client.User;
+import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ public class CardSmall extends Card {
       ICON_NO_PHOTO.setScaleX(5);
       ICON_NO_PHOTO.setScaleY(5);
       ICON_NO_PHOTO.setStrokeWidth(0.5);
-      grid.add(ICON_NO_PHOTO, 0, 0);
+      grid.add(PHOTO_CONTAINER, 0, 0);
 
       nameText.setWrappingWidth(640);
       nameText.setFont(Font.font("SansSerif", 60));
@@ -56,12 +57,13 @@ public class CardSmall extends Card {
    }
 
    @Override
-   protected void animateUpdate(User user) {
+   protected void animate(ClientPupilDto dto) {
       double originY = getTranslateY();
       translate.setToY(230);
       translate.setOnFinished(event -> {
          setTranslateY(originY);
-         update(user);
+         update(dto);
+         setPhoto(dto.getCardId());
       });
       translate.play();
    }

@@ -4,13 +4,14 @@ import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Lists;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
-import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyEvent;
+import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import lt.pavilonis.monpikas.client.model.Card;
 import lt.pavilonis.monpikas.client.model.CardBig;
 import lt.pavilonis.monpikas.client.model.CardSmall;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ public class ViewController {
    private double y = 20;
    private int i;
 
-   private EvictingQueue<User> users = EvictingQueue.create(5);
+   private EvictingQueue<ClientPupilDto> clientPupilDtos = EvictingQueue.create(5);
    private List<Card> cards;
    private List<Transition> transitions = new ArrayList<>();
 
@@ -57,12 +58,11 @@ public class ViewController {
       });
       root.getChildren().addAll(cards);
       stage.addEventHandler(KeyEvent.KEY_TYPED, inputHandler);
-      stage.addEventHandler(InputEvent.ANY, System.out::println);
 
       //test event handling
       stage.addEventHandler(KeyEvent.KEY_TYPED, (KeyEvent k) -> {
-         if (k.getCharacter().equals("a")) scanEventAction("0001");
-         if (k.getCharacter().equals("b")) scanEventAction("0002");
+         if (k.getCharacter().equals("a")) scanEventAction("5002");
+         if (k.getCharacter().equals("b")) scanEventAction("5010");
          if (k.getCharacter().equals("c")) scanEventAction("0003");
          if (k.getCharacter().equals("d")) scanEventAction("0004");
       });
@@ -71,17 +71,26 @@ public class ViewController {
    public void scanEventAction(String barcode) {
       if (transitionActive()) {
          System.out.println("Transition is active, canceled request for bc: " + barcode);
-         return;
+      } else {
+         System.out.println("Requesting user with bc: " + barcode);
+         ClientPupilDto dto;
+         try {
+            dto = userRequestService.requestUser(barcode);
+         } catch (HttpClientErrorException e1) {
+            System.out.println(e1.getStatusCode()+"!!!!!!!!!!!!!!");
+            dto = new ClientPupilDto("0", "Klaida!", false, false);
+         } catch (Exception e) {
+            e.printStackTrace();
+            dto = new ClientPupilDto("0", "Klaida!", false, false);
+         }
+         clientPupilDtos.add(dto);
+         updateView();
       }
-      System.out.println("Requesting user with bc: " + barcode);
-      //userRequestService.requestUser(barcode);
-      users.add(userRequestService.fakeRequest(barcode));
-      updateView();
    }
 
    public void updateView() {
       i = 0;
-      Lists.reverse(new ArrayList<>(users)).forEach(u -> cards.get(i++).updateUserInfo(u));
+      Lists.reverse(new ArrayList<>(clientPupilDtos)).forEach(u -> cards.get(i++).updateUserInfo(u));
    }
 
    public boolean transitionActive() {
