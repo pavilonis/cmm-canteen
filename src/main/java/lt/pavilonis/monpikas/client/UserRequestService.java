@@ -13,6 +13,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -33,7 +34,7 @@ public class UserRequestService {
    @Autowired
    private RestTemplate rt;
 
-   public ClientPupilDto requestUser(String barcode) {
+   public ClientPupilDto requestUser(String barcode) throws ConnectException {
 
       String creds = username + ":" + password;
       byte[] base64credsBytes = Base64.getEncoder().encode(creds.getBytes());

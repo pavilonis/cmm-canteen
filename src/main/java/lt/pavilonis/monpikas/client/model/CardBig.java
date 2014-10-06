@@ -2,9 +2,8 @@ package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
-import javafx.application.Platform;
-import javafx.concurrent.Service;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.layout.ColumnConstraints;
@@ -15,7 +14,6 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -70,13 +68,13 @@ public class CardBig extends Card {
 
       REJECT_TEXT.setFont(Font.font("SansSerif", 40));
 
-      ColumnConstraints columnConstraint = new ColumnConstraints(580);
+      ColumnConstraints columnConstraint = new ColumnConstraints(540);
       columnConstraint.setHalignment(HPos.CENTER);
       grid.getColumnConstraints().add(columnConstraint);
 
-      RowConstraints rcTop = new RowConstraints(500);
+      RowConstraints rcTop = new RowConstraints(480);
       rcTop.setValignment(VPos.CENTER);
-      RowConstraints rcMiddle = new RowConstraints(200);
+      RowConstraints rcMiddle = new RowConstraints(180);
       rcMiddle.setValignment(VPos.CENTER);
       RowConstraints rcBottom = new RowConstraints(160);
       rcBottom.setValignment(VPos.CENTER);
@@ -100,29 +98,36 @@ public class CardBig extends Card {
       STATUS_MSG_FLOW_PANE.setAlignment(Pos.CENTER);
       STATUS_MSG_FLOW_PANE.setHgap(60);
       grid.add(STATUS_MSG_FLOW_PANE, 0, 2);
-
+      grid.setPadding(new Insets(20));
       getChildren().add(outerRect);
       getChildren().add(innerRect);
       getChildren().add(grid);
    }
 
    @Override
-   protected void update(ClientPupilDto dto) {
+   public void update() {
       STATUS_MSG_FLOW_PANE.getChildren().clear();
-      if (!checkIfDinnerAllowed(dto)) {
-         REJECT_TEXT.setText(
-               (!dto.isDinnerPermitted())
-                     ? NO_PERMISSION_MSG
-                     : ALREADY_HAD_DINNER_MSG
-         );
-         STATUS_MSG_FLOW_PANE.getChildren().addAll(ICON_STATUS_REJECT, REJECT_TEXT);
+      if (!dto.isError()) {
+         if (!checkIfDinnerAllowed()) {
+            REJECT_TEXT.setText(
+                  (!dto.isDinnerPermitted())
+                        ? NO_PERMISSION_MSG
+                        : ALREADY_HAD_DINNER_MSG
+            );
+            STATUS_MSG_FLOW_PANE.getChildren().addAll(ICON_STATUS_REJECT, REJECT_TEXT);
+         } else {
+            STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
+         }
+         setPhoto();
       } else {
-         STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
+         checkIfDinnerAllowed();
+         STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_REJECT);
       }
+      ensureVisible();
    }
 
    @Override
-   protected void animate(ClientPupilDto dto) {
+   public void animate() {
       double originX = getTranslateX();
       double originY = getTranslateY();
       translate.setToX(703);
@@ -136,13 +141,13 @@ public class CardBig extends Card {
          setScaleY(1);
          setTranslateX(originX);
          setTranslateY(originY);
-         update(dto);
+         update();
          fade.setFromValue(0);
          fade.setToValue(1);
          fade.play();
          fade.setOnFinished(event2 -> {
-            Platform.runLater(()->setPhoto(dto.getCardId()));
             fade.setOnFinished(null);
+            setPhoto();
          });
       });
       scale.play();

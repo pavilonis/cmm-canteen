@@ -4,8 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -26,6 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class Card extends Group {
+
+   protected ClientPupilDto dto;
 
    @Value("${Card.Icon.NoPhotoContent}")
    protected String ICON_NO_PHOTO_CONTENT_PATH;
@@ -49,6 +50,8 @@ public abstract class Card extends Group {
 
    public void initialize() {
       setVisible(false);
+      PHOTO_CONTAINER.setAlignment(Pos.CENTER);
+
       ICON_NO_PHOTO.setContent(ICON_NO_PHOTO_CONTENT_PATH);
       ICON_NO_PHOTO.setStroke(Color.DARKGREY);
       ICON_NO_PHOTO.setFill(Color.LIGHTGRAY);
@@ -70,45 +73,34 @@ public abstract class Card extends Group {
       fade.setInterpolator(Interpolator.EASE_IN);
    }
 
-   public void updateUserInfo(ClientPupilDto clientPupilDto) {
-      if (cardIsVisible()) {
-         animate(clientPupilDto);
-      } else {
-         update(clientPupilDto);
-         setVisible(true);
-      }
-   }
-
    public List<Transition> getTransitions() {
       return Arrays.asList(translate, fade);
    }
 
-   protected abstract void animate(ClientPupilDto clientPupilDto);
+   public abstract void animate();
 
-   protected void update(ClientPupilDto dto) {
-      checkIfDinnerAllowed(dto);
-   }
+   public abstract void update();
 
-   protected boolean checkIfDinnerAllowed(ClientPupilDto dto) {
+   //TODO refactor, should only check, not do some logic
+   protected boolean checkIfDinnerAllowed() {
       nameText.setText(dto.getName());
       boolean allowed = dto.isDinnerPermitted() && !dto.isHadDinnerToday();
       outerRect.setFill((allowed) ? Color.GREEN : Color.RED);
       return allowed;
    }
 
-   protected boolean cardIsVisible() {
-      return !nameText.getText().isEmpty();
-   }
-
-   protected void setPhoto(String id) {
-      String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";//PHOTO_BASE_PATH + id + IMAGE_EXTENSION;
+   protected void setPhoto() {
+      //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
+      String remoteImgUrl = PHOTO_BASE_PATH + dto.getCardId() + IMAGE_EXTENSION;
       PHOTO_CONTAINER.getChildren().clear();
-            if (remoteImageExists(remoteImgUrl)) {
-               userPhoto.setImage(new Image(remoteImgUrl, 0, 0, true, false, true));
-               PHOTO_CONTAINER.getChildren().add(userPhoto);
-            } else {
-               PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
-            }
+      if (remoteImageExists(remoteImgUrl)) {
+         Image img = new Image(remoteImgUrl, 0, 0, true, false, true);
+         userPhoto.setImage(img);
+         PHOTO_CONTAINER.getChildren().add(userPhoto);
+         userPhoto.setY(50);
+      } else {
+         PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
+      }
    }
 
    private boolean remoteImageExists(String url) {
@@ -121,6 +113,16 @@ public abstract class Card extends Group {
          return (http.getResponseCode() == HttpURLConnection.HTTP_OK);
       } catch (Exception e) {
          return false;
+      }
+   }
+
+   public void setDto(ClientPupilDto dto) {
+      this.dto = dto;
+   }
+
+   protected void ensureVisible() {
+      if (!isVisible()) {
+         setVisible(true);
       }
    }
 }

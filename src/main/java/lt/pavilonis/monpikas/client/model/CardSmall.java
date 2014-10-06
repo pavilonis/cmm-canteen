@@ -1,13 +1,11 @@
 package lt.pavilonis.monpikas.client.model;
 
-import javafx.application.Platform;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
-import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +13,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class CardSmall extends Card {
 
+   Card next;
+
    @Override
    public void initialize() {
 
       super.initialize();
       setLayoutX(620);
 
-      grid.setPadding(new Insets(20));
-      grid.setHgap(10);
+      grid.setPadding(new Insets(10));
+      //grid.setHgap(10);
 
       ColumnConstraints ccLeft = new ColumnConstraints(142.5);
       ColumnConstraints ccRight = new ColumnConstraints(657.5);
@@ -57,14 +57,28 @@ public class CardSmall extends Card {
    }
 
    @Override
-   protected void animate(ClientPupilDto dto) {
+   public void animate() {
       double originY = getTranslateY();
       translate.setToY(230);
       translate.setOnFinished(event -> {
          setTranslateY(originY);
-         update(dto);
-         setPhoto(dto.getCardId());
+         update();
+         setPhoto();
+         next.update();
       });
       translate.play();
+   }
+
+   @Override
+   public void update() {
+      if (dto != null) {
+         checkIfDinnerAllowed();
+         setPhoto();
+         ensureVisible();
+      }
+   }
+
+   public void setNext(Card next) {
+      this.next = next;
    }
 }

@@ -10,10 +10,12 @@ import lt.pavilonis.monpikas.client.model.Card;
 import lt.pavilonis.monpikas.client.model.CardBig;
 import lt.pavilonis.monpikas.client.model.CardSmall;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.annotation.PostConstruct;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +49,13 @@ public class ViewController {
 
    @PostConstruct
    public void initialize() {
+//      first.setNext(second);
+//      second.setNext(third);
+//      third.setNext(forth);
+//      forth.setNext(fifth);
+
       cards = asList(first, second, third, forth, fifth);
+      //cards = asList(fifth, forth, third, second, first);
       cards.forEach(c -> {
          c.initialize();
          transitions.addAll(c.getTransitions());
@@ -65,6 +73,7 @@ public class ViewController {
          if (k.getCharacter().equals("b")) scanEventAction("5010");
          if (k.getCharacter().equals("c")) scanEventAction("0003");
          if (k.getCharacter().equals("d")) scanEventAction("0004");
+         if (k.getCharacter().equals("e")) scanEventAction("0533");
       });
    }
 
@@ -77,11 +86,15 @@ public class ViewController {
          try {
             dto = userRequestService.requestUser(barcode);
          } catch (HttpClientErrorException e1) {
-            System.out.println(e1.getStatusCode()+"!!!!!!!!!!!!!!");
-            dto = new ClientPupilDto("0", "Klaida!", false, false);
+            if (e1.getStatusCode() == HttpStatus.NOT_FOUND) {
+               dto = new ClientPupilDto("Nerasta sistemoje!");
+            } else {
+               dto = new ClientPupilDto("Nežinoma http klaida!");
+            }
+         } catch (ConnectException ce) {
+            dto = new ClientPupilDto("Nežinoma klaida!");
          } catch (Exception e) {
-            e.printStackTrace();
-            dto = new ClientPupilDto("0", "Klaida!", false, false);
+            dto = new ClientPupilDto("Nežinoma klaida!");
          }
          clientPupilDtos.add(dto);
          updateView();
@@ -90,7 +103,12 @@ public class ViewController {
 
    public void updateView() {
       i = 0;
-      Lists.reverse(new ArrayList<>(clientPupilDtos)).forEach(u -> cards.get(i++).updateUserInfo(u));
+      Lists.reverse(new ArrayList<>(clientPupilDtos)).forEach(dto -> {
+         cards.get(i).setDto(dto);
+         cards.get(i).update();
+         i++;
+      });
+      //first.update();
    }
 
    public boolean transitionActive() {

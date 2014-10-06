@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @ComponentScan({"lt.pavilonis.monpikas.client", "resources"})
-@PropertySource({"app.properties"})
+@PropertySource({"app.properties", "file:monpikas.properties"})
 public class AppConfig {
 
    @Bean
@@ -28,11 +28,4 @@ public class AppConfig {
       conf.setFileEncoding("UTF-8");
       return conf;
    }
-
-//   @Bean
-//   public static ReloadableResourceBundleMessageSource getReloadableResourceBundleMessageSource() {
-//      ReloadableResourceBundleMessageSource source = new ReloadableResourceBundleMessageSource();
-//      source.setDefaultEncoding("UTF-8");
-//      return source;
-//   }
 }
