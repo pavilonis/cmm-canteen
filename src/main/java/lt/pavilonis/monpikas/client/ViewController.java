@@ -9,6 +9,7 @@ import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import lt.pavilonis.monpikas.client.model.Card;
 import lt.pavilonis.monpikas.client.model.CardBig;
 import lt.pavilonis.monpikas.client.model.CardSmall;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,8 @@ import static lt.pavilonis.monpikas.client.App.stage;
 
 @Controller
 public class ViewController {
+
+   private static final Logger LOG = Logger.getLogger(ViewController.class.getSimpleName());
 
    @Autowired
    private CardBig first;
@@ -79,22 +82,29 @@ public class ViewController {
 
    public void scanEventAction(String barcode) {
       if (transitionActive()) {
-         System.out.println("Transition is active, canceled request for bc: " + barcode);
+         LOG.info("Transition is active, canceled request for bc: " + barcode);
       } else {
-         System.out.println("Requesting user with bc: " + barcode);
+         LOG.info("Requesting user with bc: " + barcode);
          ClientPupilDto dto;
          try {
             dto = userRequestService.requestUser(barcode);
          } catch (HttpClientErrorException e1) {
             if (e1.getStatusCode() == HttpStatus.NOT_FOUND) {
+               dto = new ClientPupilDto("Nėra ryšio");
+               LOG.info("HttpClientErrorException - no connection: " + e1);
+            } else if (e1.getStatusCode() == HttpStatus.BAD_REQUEST) {
                dto = new ClientPupilDto("Nerasta sistemoje!");
+               LOG.info("HttpClientErrorException - pupil not found: " + e1);
             } else {
-               dto = new ClientPupilDto("Nežinoma http klaida!");
+               dto = new ClientPupilDto("Nežinoma klaida!");
+               LOG.info("HttpClientErrorException - Unknown error: " + e1);
             }
          } catch (ConnectException ce) {
             dto = new ClientPupilDto("Nežinoma klaida!");
+            LOG.info("ConnectException - unknown error: " + ce);
          } catch (Exception e) {
             dto = new ClientPupilDto("Nežinoma klaida!");
+            LOG.info("Exception - unknown error: " + e);
          }
          clientPupilDtos.add(dto);
          updateView();
@@ -103,11 +113,12 @@ public class ViewController {
 
    public void updateView() {
       i = 0;
-      Lists.reverse(new ArrayList<>(clientPupilDtos)).forEach(dto -> {
-         cards.get(i).setDto(dto);
-         cards.get(i).update();
-         i++;
-      });
+      Lists.reverse(new ArrayList<>(clientPupilDtos))
+            .forEach(dto -> {
+               cards.get(i).setDto(dto);
+               cards.get(i).update();
+               i++;
+            });
       //first.update();
    }
 
