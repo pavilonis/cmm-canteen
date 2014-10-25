@@ -12,7 +12,6 @@ import lt.pavilonis.monpikas.client.model.CardBig;
 import lt.pavilonis.monpikas.client.model.CardSmall;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.HttpClientErrorException;
@@ -31,9 +30,6 @@ import static lt.pavilonis.monpikas.client.App.stage;
 public class ViewController {
 
    private static final Logger LOG = Logger.getLogger(ViewController.class.getSimpleName());
-
-   @Value("${Audio.SystemErrorAudioPath}")
-   private String PLAY_SYS_ERROR_SOUND_CMD;
 
    @Autowired
    private CardBig first;
@@ -61,13 +57,12 @@ public class ViewController {
 
    @PostConstruct
    public void initialize() {
-//      first.setNext(second);
-//      second.setNext(third);
-//      third.setNext(forth);
-//      forth.setNext(fifth);
+      fifth.setNext(forth);
+      forth.setNext(third);
+      third.setNext(second);
+      second.setNext(first);
 
       cards = asList(first, second, third, forth, fifth);
-      //cards = asList(fifth, forth, third, second, first);
       cards.forEach(c -> {
          c.initialize();
          transitions.addAll(c.getTransitions());
@@ -108,14 +103,11 @@ public class ViewController {
                dto = new ClientPupilDto("Nežinoma klaida!");
                LOG.info("HttpClientErrorException - Unknown error: " + e1);
             }
-            playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
          } catch (ConnectException ce) {
             dto = new ClientPupilDto("Nežinoma klaida!");
             LOG.info("ConnectException - unknown error: " + ce);
-            playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
          } catch (Exception e) {
             dto = new ClientPupilDto("Nežinoma klaida!");
-            playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
             LOG.info("Exception - unknown error: " + e);
          }
          clientPupilDtos.add(dto);
@@ -128,10 +120,9 @@ public class ViewController {
       Lists.reverse(new ArrayList<>(clientPupilDtos))
             .forEach(dto -> {
                cards.get(i).setDto(dto);
-               cards.get(i).update();
                i++;
             });
-      //first.update();
+      fifth.update();
    }
 
    public boolean transitionActive() {

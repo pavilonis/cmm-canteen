@@ -4,6 +4,8 @@ import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.effect.DropShadow;
@@ -43,7 +45,7 @@ public abstract class Card extends Group {
    protected final Rectangle innerRect = new Rectangle();
    protected final Text nameText = new Text();
    protected final GridPane grid = new GridPane();
-   protected final Duration ANIMATION_DURATION = Duration.seconds(0.5);
+   protected final Duration ANIMATION_DURATION = Duration.seconds(0.2);
    protected ImageView userPhoto = new ImageView();
    FadeTransition fade = new FadeTransition(ANIMATION_DURATION, this);
    TranslateTransition translate = new TranslateTransition(ANIMATION_DURATION, this);
@@ -77,8 +79,6 @@ public abstract class Card extends Group {
       return Arrays.asList(translate, fade);
    }
 
-   public abstract void animate();
-
    public abstract void update();
 
    //TODO refactor, should only check, not do some logic
@@ -90,20 +90,31 @@ public abstract class Card extends Group {
    }
 
    protected void setPhoto() {
-      //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
-      String remoteImgUrl = PHOTO_BASE_PATH + dto.getCardId() + IMAGE_EXTENSION;
-      PHOTO_CONTAINER.getChildren().clear();
-      if (remoteImageExists(remoteImgUrl)) {
-         Image img = new Image(remoteImgUrl, 0, 0, true, false, true);
-         userPhoto.setImage(img);
-         PHOTO_CONTAINER.getChildren().add(userPhoto);
-         userPhoto.setY(50);
-      } else {
-         PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
-      }
+      Thread th = new Thread(new Task<Void>() {
+         @Override
+         protected Void call() throws Exception {
+            //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
+            String remoteImgUrl = PHOTO_BASE_PATH + dto.getCardId() + IMAGE_EXTENSION;
+            boolean imgExists = checkRemoteImage(remoteImgUrl);
+            Platform.runLater(() -> {
+               PHOTO_CONTAINER.getChildren().clear();
+               if (imgExists) {
+                  Image img = new Image(remoteImgUrl, 0, 0, true, false, true);
+                  userPhoto.setImage(img);
+                  PHOTO_CONTAINER.getChildren().add(userPhoto);
+                  userPhoto.setY(50);
+               } else {
+                  PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
+               }
+            });
+            return null;
+         }
+      });
+      th.setDaemon(true);
+      th.start();
    }
 
-   private boolean remoteImageExists(String url) {
+   private boolean checkRemoteImage(String url) {
       try {
          URL u = new URL(url);
          HttpURLConnection http = (HttpURLConnection) u.openConnection();

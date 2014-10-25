@@ -26,6 +26,9 @@ import static java.util.Arrays.asList;
 @Component
 public class CardBig extends Card {
 
+   @Value("${Audio.SystemErrorAudioPath}")
+   public String PLAY_SYS_ERROR_SOUND_CMD;
+
    @Value("${Audio.ErrorAudioPath}")
    private String PLAY_ERROR_SOUND_CMD;
 
@@ -115,10 +118,41 @@ public class CardBig extends Card {
 
    @Override
    public void update() {
+      if (dto != null) {
+         double originX = getTranslateX();
+         double originY = getTranslateY();
+         translate.setToX(703);
+         translate.setToY(-328);
+         scale.setToX(1.4);
+         scale.setToY(.245);
+         fade.setFromValue(1);
+         fade.setToValue(0);
+         fade.setOnFinished(event -> {
+            setScaleX(1);
+            setScaleY(1);
+            setTranslateX(originX);
+            setTranslateY(originY);
+            fade.setFromValue(0);
+            fade.setToValue(1);
+            fade.play();
+            updateData();
+            fade.setOnFinished(event2 -> {
+               fade.setOnFinished(null);
+               setPhoto();
+            });
+         });
+         scale.play();
+         translate.play();
+         fade.play();
+      }
+   }
+
+   private void updateData() {
       STATUS_MSG_FLOW_PANE.getChildren().clear();
       if (dto.isSystemError()) {
          checkIfDinnerAllowed();
          STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_REJECT);
+         controller.playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
       } else {
          if (checkIfDinnerAllowed()) {
             STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
@@ -137,46 +171,7 @@ public class CardBig extends Card {
    }
 
    @Override
-   public void animate() {
-      double originX = getTranslateX();
-      double originY = getTranslateY();
-      translate.setToX(703);
-      translate.setToY(-328);
-      scale.setToX(1.4);
-      scale.setToY(.245);
-      fade.setFromValue(1);
-      fade.setToValue(0);
-      fade.setOnFinished(event -> {
-         setScaleX(1);
-         setScaleY(1);
-         setTranslateX(originX);
-         setTranslateY(originY);
-         update();
-         fade.setFromValue(0);
-         fade.setToValue(1);
-         fade.play();
-         fade.setOnFinished(event2 -> {
-            fade.setOnFinished(null);
-            setPhoto();
-         });
-      });
-      scale.play();
-      translate.play();
-      fade.play();
-   }
-
-   @Override
    public List<Transition> getTransitions() {
       return asList(scale, fade, translate);
    }
-//
-//   @Override
-//   protected boolean setPhoto(String id) {
-//      if (super.setPhoto(id)) {
-//         userPhoto
-//      } else {
-//         return false;
-//      }
-//
-//   }
 }

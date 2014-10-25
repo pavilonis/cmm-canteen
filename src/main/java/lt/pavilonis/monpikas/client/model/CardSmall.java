@@ -1,5 +1,7 @@
 package lt.pavilonis.monpikas.client.model;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -8,6 +10,8 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import static java.lang.Thread.sleep;
 
 @Scope(value = "prototype")
 @Component
@@ -21,14 +25,12 @@ public class CardSmall extends Card {
       super.initialize();
       setLayoutX(620);
 
-      grid.setPadding(new Insets(10));
-      //grid.setHgap(10);
-
       ColumnConstraints ccLeft = new ColumnConstraints(142.5);
       ColumnConstraints ccRight = new ColumnConstraints(657.5);
       ccLeft.setHalignment(HPos.CENTER);
       ccRight.setHalignment(HPos.CENTER);
       grid.getColumnConstraints().addAll(ccLeft, ccRight);
+      grid.setPadding(new Insets(10));
 
       RowConstraints rc = new RowConstraints(180);
       rc.setValignment(VPos.CENTER);
@@ -57,30 +59,39 @@ public class CardSmall extends Card {
    }
 
    @Override
-   public void animate() {
+   public void update() {
       double originY = getTranslateY();
-      translate.setToY(230);
+      translate.setToY(220);
       translate.setOnFinished(event -> {
-         setTranslateY(originY);
-         update();
-         setPhoto();
+         sleepAndRun(originY);
          next.update();
       });
       translate.play();
    }
 
-   @Override
-   public void update() {
-      if (dto != null) {
-         checkIfDinnerAllowed();
-         if (!dto.isSystemError()) {
-            setPhoto();
-         }
-         ensureVisible();
-      }
-   }
-
    public void setNext(Card next) {
       this.next = next;
+   }
+
+   protected void sleepAndRun(double originY) {
+      Thread th = new Thread(new Task<Void>() {
+         @Override
+         protected Void call() throws Exception {
+            sleep((long) ANIMATION_DURATION.toMillis());
+            Platform.runLater(() -> {
+               setTranslateY(originY);
+               if (dto != null) {
+                  checkIfDinnerAllowed();
+                  if (!dto.isSystemError()) {
+                     setPhoto();
+                  }
+                  ensureVisible();
+               }
+            });
+            return null;
+         }
+      });
+      th.setDaemon(true);
+      th.start();
    }
 }
