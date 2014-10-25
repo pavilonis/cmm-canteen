@@ -44,12 +44,12 @@ public abstract class Card extends Group {
    protected final Rectangle innerRect = new Rectangle();
    protected final Text nameText = new Text();
    protected final GridPane grid = new GridPane();
-   protected final Duration ANIMATION_DURATION = Duration.seconds(.4);
-   protected ImageView userPhoto = new ImageView();
+   protected final Duration ANIMATION_DURATION = Duration.seconds(.2);
+   protected ImageView imageView = new ImageView();
+   protected Image image;
    TranslateTransition translate = new TranslateTransition(ANIMATION_DURATION, this);
 
    public void initialize() {
-      this.setCache(true);
       setVisible(false);
       PHOTO_CONTAINER.setAlignment(Pos.CENTER);
 
@@ -57,9 +57,9 @@ public abstract class Card extends Group {
       ICON_NO_PHOTO.setStroke(Color.DARKGREY);
       ICON_NO_PHOTO.setFill(Color.LIGHTGRAY);
 
-      userPhoto.setPreserveRatio(true);
-      userPhoto.fitWidthProperty().bind(PHOTO_CONTAINER.widthProperty().asObject());
-      userPhoto.fitHeightProperty().bind(PHOTO_CONTAINER.heightProperty());
+      imageView.setPreserveRatio(true);
+      imageView.fitWidthProperty().bind(PHOTO_CONTAINER.widthProperty().asObject());
+      imageView.fitHeightProperty().bind(PHOTO_CONTAINER.heightProperty());
 
       outerRect.setArcHeight(20);
       outerRect.setArcWidth(20);
@@ -90,16 +90,16 @@ public abstract class Card extends Group {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
+            String remoteImgUrl = "http://img.lrytas.lt/show_foto/?id=1350442&f=4&s=20";
             //String remoteImgUrl = PHOTO_BASE_PATH + dto.getCardId() + IMAGE_EXTENSION;
             boolean imgExists = checkRemoteImage(remoteImgUrl);
             Platform.runLater(() -> {
                PHOTO_CONTAINER.getChildren().clear();
                if (imgExists) {
                   Image img = new Image(remoteImgUrl, 0, 0, true, false, true);
-                  userPhoto.setImage(img);
-                  PHOTO_CONTAINER.getChildren().add(userPhoto);
-                  userPhoto.setY(50);
+                  imageView.setImage(img);
+                  PHOTO_CONTAINER.getChildren().add(imageView);
+                  imageView.setY(50);
                } else {
                   PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
                }

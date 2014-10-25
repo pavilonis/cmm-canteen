@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.concurrent.Task;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import lt.pavilonis.monpikas.client.model.Card;
@@ -52,6 +53,7 @@ public class ViewController {
    private int i;
 
    private EvictingQueue<ClientPupilDto> clientPupilDtos = EvictingQueue.create(5);
+   private EvictingQueue<Image> images = EvictingQueue.create(5);
    private List<Card> cards;
    private List<Transition> transitions = new ArrayList<>();
 

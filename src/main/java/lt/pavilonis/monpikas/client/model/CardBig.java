@@ -1,12 +1,16 @@
 package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
+import static java.lang.Thread.sleep;
 import static javafx.geometry.VPos.CENTER;
 
 import javafx.scene.layout.ColumnConstraints;
@@ -56,8 +60,8 @@ public class CardBig extends Card {
    private final SVGPath ICON_STATUS_OK = new SVGPath();
    private final SVGPath ICON_STATUS_REJECT = new SVGPath();
    private final FlowPane STATUS_MSG_FLOW_PANE = new FlowPane();
-   private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION, this);
-   private final FadeTransition fade = new FadeTransition(new Duration(700), this);
+   private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION.multiply(5), this);
+   private final FadeTransition fade = new FadeTransition(ANIMATION_DURATION.multiply(5), this);
 
    @Override
    public void initialize() {
@@ -65,6 +69,8 @@ public class CardBig extends Card {
       super.initialize();
       setLayoutX(20);
       setLayoutY(20);
+
+      translate.setDuration(ANIMATION_DURATION.multiply(5));
 
       ICON_NO_PHOTO.setScaleX(19);
       ICON_NO_PHOTO.setScaleY(19);
@@ -129,29 +135,16 @@ public class CardBig extends Card {
 
       double originX = getTranslateX();
       double originY = getTranslateY();
-      translate.setToX(703);
-      translate.setToY(-328);
-      scale.setToX(1.4);
-      scale.setToY(.245);
-      fade.setFromValue(1);
-      fade.setToValue(0);
-      fade.setOnFinished(event -> {
+      translate.setToX(605);
+      translate.setToY(-655);
+      translate.setOnFinished(event -> {
+         setVisible(false);
          updateData();
-         setScaleX(1);
-         setScaleY(1);
          setTranslateX(originX);
          setTranslateY(originY);
-         fade.setFromValue(0);
-         fade.setToValue(1);
-         fade.play();
-         fade.setOnFinished(event2 -> {
-            fade.setOnFinished(null);
-            ensureVisible();
-         });
+         sleepAndRun();
       });
-      scale.play();
       translate.play();
-      fade.play();
    }
 
    private void updateData() {
@@ -172,12 +165,30 @@ public class CardBig extends Card {
             );
             STATUS_MSG_FLOW_PANE.getChildren().addAll(ICON_STATUS_REJECT, REJECT_TEXT);
          }
-         setPhoto();
       }
    }
 
    @Override
    public List<Transition> getTransitions() {
       return asList(scale, fade, translate);
+   }
+
+   protected void sleepAndRun() {
+      Thread th = new Thread(new Task<Void>() {
+         @Override
+         protected Void call() throws Exception {
+            Platform.runLater(()->setPhoto());
+            sleep((long) ANIMATION_DURATION.toMillis());
+            Platform.runLater(() -> {
+               fade.setFromValue(0);
+               fade.setToValue(1);
+               fade.play();
+               setVisible(true);
+            });
+            return null;
+         }
+      });
+      th.setDaemon(true);
+      th.start();
    }
 }

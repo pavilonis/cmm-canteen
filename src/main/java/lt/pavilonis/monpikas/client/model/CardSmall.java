@@ -81,7 +81,7 @@ public class CardSmall extends Card {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            sleep((long) ANIMATION_DURATION.toMillis());
+            sleep((long) ANIMATION_DURATION.toMillis()*5);
             Platform.runLater(() -> {
                setTranslateY(originY);
                if (dto != null) {
