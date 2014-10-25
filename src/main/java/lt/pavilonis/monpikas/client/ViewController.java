@@ -1,7 +1,6 @@
 package lt.pavilonis.monpikas.client;
 
 import com.google.common.collect.EvictingQueue;
-import com.google.common.collect.Lists;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.concurrent.Task;
@@ -13,15 +12,20 @@ import lt.pavilonis.monpikas.client.model.CardBig;
 import lt.pavilonis.monpikas.client.model.CardSmall;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.annotation.PostConstruct;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import static com.google.common.collect.Lists.reverse;
 import static java.lang.Runtime.getRuntime;
 import static java.util.Arrays.asList;
 import static lt.pavilonis.monpikas.client.App.root;
@@ -31,6 +35,12 @@ import static lt.pavilonis.monpikas.client.App.stage;
 public class ViewController {
 
    private static final Logger LOG = Logger.getLogger(ViewController.class.getSimpleName());
+
+   @Value("${Images.PhotoBasePath}")
+   private String PHOTO_BASE_PATH;
+
+   @Value("${Images.Extension}")
+   private String IMAGE_EXTENSION;
 
    @Autowired
    private CardBig first;
@@ -53,7 +63,14 @@ public class ViewController {
    private int i;
 
    private EvictingQueue<ClientPupilDto> clientPupilDtos = EvictingQueue.create(5);
-   private EvictingQueue<Image> images = EvictingQueue.create(5);
+
+   private LinkedHashMap<String, Image> images = new LinkedHashMap<String, Image>(5) {
+      @Override
+      protected boolean removeEldestEntry(java.util.Map.Entry<String, Image> entry) {
+         return size() > 5;
+      }
+   };
+
    private List<Card> cards;
    private List<Transition> transitions = new ArrayList<>();
 
@@ -113,17 +130,20 @@ public class ViewController {
             LOG.info("Exception - unknown error: " + e);
          }
          clientPupilDtos.add(dto);
+         addNewImage(dto.getCardId());
          updateView();
       }
    }
 
    public void updateView() {
       i = 0;
-      Lists.reverse(new ArrayList<>(clientPupilDtos))
-            .forEach(dto -> {
+      reverse(new ArrayList<>(clientPupilDtos)).forEach(
+            dto -> {
                cards.get(i).setDto(dto);
+               cards.get(i).setImage(images.get(dto.getCardId()));
                i++;
-            });
+            }
+      );
       fifth.update();
    }
 
@@ -145,5 +165,24 @@ public class ViewController {
       });
       th.setDaemon(true);
       th.start();
+   }
+
+   private void addNewImage(String id) {
+      String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
+      //String remoteImgUrl = PHOTO_BASE_PATH + id + IMAGE_EXTENSION;
+      images.put(id, new Image(remoteImgUrl, 0, 0, true, false, true));
+   }
+
+   private boolean checkRemoteImage(String url) {
+      try {
+         URL u = new URL(url);
+         HttpURLConnection http = (HttpURLConnection) u.openConnection();
+         http.setInstanceFollowRedirects(false);
+         http.setRequestMethod("HEAD");
+         http.connect();
+         return (http.getResponseCode() == HttpURLConnection.HTTP_OK);
+      } catch (Exception e) {
+         return false;
+      }
    }
 }

@@ -9,8 +9,8 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @ComponentScan({"lt.pavilonis.monpikas.client", "resources"})
-@PropertySource({"inner.properties", "file:monpikas.properties"})
-//@PropertySource({"inner.properties", "file:/opt/monpikas/monpikas.properties"})
+//@PropertySource({"inner.properties", "file:monpikas.properties"})
+@PropertySource({"inner.properties", "file:/opt/monpikas/monpikas.properties"})
 public class AppConfig {
 
    @Bean

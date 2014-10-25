@@ -19,8 +19,6 @@ import javafx.util.Duration;
 import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -31,12 +29,6 @@ public abstract class Card extends Group {
 
    @Value("${Card.Icon.NoPhotoContent}")
    protected String ICON_NO_PHOTO_CONTENT_PATH;
-
-   @Value("${Images.PhotoBasePath}")
-   private String PHOTO_BASE_PATH;
-
-   @Value("${Images.Extension}")
-   private String IMAGE_EXTENSION;
 
    protected final FlowPane PHOTO_CONTAINER = new FlowPane();
    protected final SVGPath ICON_NO_PHOTO = new SVGPath();
@@ -90,18 +82,14 @@ public abstract class Card extends Group {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            String remoteImgUrl = "http://img.lrytas.lt/show_foto/?id=1350442&f=4&s=20";
-            //String remoteImgUrl = PHOTO_BASE_PATH + dto.getCardId() + IMAGE_EXTENSION;
-            boolean imgExists = checkRemoteImage(remoteImgUrl);
             Platform.runLater(() -> {
                PHOTO_CONTAINER.getChildren().clear();
-               if (imgExists) {
-                  Image img = new Image(remoteImgUrl, 0, 0, true, false, true);
-                  imageView.setImage(img);
+               if (image.getProgress() == 1.0 && (image.getWidth() == 0.0 || image.getHeight() == 0.0)) {
+                  PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
+               } else {
+                  imageView.setImage(image);
                   PHOTO_CONTAINER.getChildren().add(imageView);
                   imageView.setY(50);
-               } else {
-                  PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
                }
             });
             return null;
@@ -109,19 +97,6 @@ public abstract class Card extends Group {
       });
       th.setDaemon(true);
       th.start();
-   }
-
-   private boolean checkRemoteImage(String url) {
-      try {
-         URL u = new URL(url);
-         HttpURLConnection http = (HttpURLConnection) u.openConnection();
-         http.setInstanceFollowRedirects(false);
-         http.setRequestMethod("HEAD");
-         http.connect();
-         return (http.getResponseCode() == HttpURLConnection.HTTP_OK);
-      } catch (Exception e) {
-         return false;
-      }
    }
 
    public void setDto(ClientPupilDto dto) {
@@ -132,5 +107,9 @@ public abstract class Card extends Group {
       if (!isVisible()) {
          setVisible(true);
       }
+   }
+
+   public void setImage(Image image) {
+      this.image = image;
    }
 }

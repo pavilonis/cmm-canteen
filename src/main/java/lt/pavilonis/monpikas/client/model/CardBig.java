@@ -1,7 +1,6 @@
 package lt.pavilonis.monpikas.client.model;
 
 import javafx.animation.FadeTransition;
-import javafx.animation.Interpolator;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.Platform;
@@ -9,10 +8,6 @@ import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
-import static java.lang.Thread.sleep;
-import static javafx.geometry.VPos.CENTER;
-
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.RowConstraints;
@@ -21,7 +16,6 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.util.Duration;
 import lt.pavilonis.monpikas.client.ViewController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,16 +23,21 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static javafx.animation.Interpolator.EASE_IN;
+import static javafx.geometry.VPos.CENTER;
 
 @Component
 public class CardBig extends Card {
 
-   @Value("${Audio.SystemErrorAudioPath}")
+   @Value("${Audio.Success}")
+   private String PLAY_SUCCESS_SOUND_CMD;
+
+   @Value("${Audio.SystemError}")
    public String PLAY_SYS_ERROR_SOUND_CMD;
 
-   @Value("${Audio.ErrorAudioPath}")
+   @Value("${Audio.Error}")
    private String PLAY_ERROR_SOUND_CMD;
 
    @Value("${Card.Message.NoPermission}")
@@ -156,6 +155,7 @@ public class CardBig extends Card {
       } else {
          if (checkIfDinnerAllowed()) {
             STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
+            controller.playErrorSound(PLAY_SUCCESS_SOUND_CMD);
          } else {
             controller.playErrorSound(PLAY_ERROR_SOUND_CMD);
             REJECT_TEXT.setText(
@@ -177,7 +177,7 @@ public class CardBig extends Card {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            Platform.runLater(()->setPhoto());
+            Platform.runLater(() -> setPhoto());
             sleep((long) ANIMATION_DURATION.toMillis());
             Platform.runLater(() -> {
                fade.setFromValue(0);
