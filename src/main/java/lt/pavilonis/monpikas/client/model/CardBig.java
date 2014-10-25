@@ -14,14 +14,20 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import lt.pavilonis.monpikas.client.ViewController;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static java.util.Arrays.asList;
 
 @Component
 public class CardBig extends Card {
+
+   @Value("${Audio.ErrorAudioPath}")
+   private String PLAY_ERROR_SOUND_CMD;
 
    @Value("${Card.Message.NoPermission}")
    private String NO_PERMISSION_MSG;
@@ -34,6 +40,9 @@ public class CardBig extends Card {
 
    @Value("${Card.Icon.StatusRejectedContent}")
    private String ICON_STATUS_REJECT_CONTENT;
+
+   @Autowired
+   ViewController controller;
 
    private final Text REJECT_TEXT = new Text();
    private final SVGPath ICON_STATUS_OK = new SVGPath();
@@ -107,21 +116,22 @@ public class CardBig extends Card {
    @Override
    public void update() {
       STATUS_MSG_FLOW_PANE.getChildren().clear();
-      if (!dto.isError()) {
-         if (!checkIfDinnerAllowed()) {
+      if (dto.isSystemError()) {
+         checkIfDinnerAllowed();
+         STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_REJECT);
+      } else {
+         if (checkIfDinnerAllowed()) {
+            STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
+         } else {
+            controller.playErrorSound(PLAY_ERROR_SOUND_CMD);
             REJECT_TEXT.setText(
                   (!dto.isDinnerPermitted())
                         ? NO_PERMISSION_MSG
                         : ALREADY_HAD_DINNER_MSG
             );
             STATUS_MSG_FLOW_PANE.getChildren().addAll(ICON_STATUS_REJECT, REJECT_TEXT);
-         } else {
-            STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
          }
          setPhoto();
-      } else {
-         checkIfDinnerAllowed();
-         STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_REJECT);
       }
       ensureVisible();
    }
@@ -157,7 +167,7 @@ public class CardBig extends Card {
 
    @Override
    public List<Transition> getTransitions() {
-      return Arrays.asList(scale, fade, translate);
+      return asList(scale, fade, translate);
    }
 //
 //   @Override

@@ -9,7 +9,7 @@ public class ClientPupilDto implements Serializable {
    private String name;
    private boolean dinnerPermitted;
    private boolean hadDinnerToday;
-   private boolean error;
+   private boolean systemError;
 
    public ClientPupilDto() {
    }
@@ -21,9 +21,9 @@ public class ClientPupilDto implements Serializable {
       this.hadDinnerToday = hadDinnerToday;
    }
 
-   //for error events
+   //for system error events
    public ClientPupilDto(String errorMsg) {
-      this.error = true;
+      this.systemError = true;
       this.cardId = "0";
       this.name = errorMsg;
       this.dinnerPermitted = false;
@@ -62,11 +62,11 @@ public class ClientPupilDto implements Serializable {
       this.hadDinnerToday = hadDinnerToday;
    }
 
-   public boolean isError() {
-      return error;
+   public boolean isSystemError() {
+      return systemError;
    }
 
-   public void setError(boolean error) {
-      this.error = error;
+   public void setSystemError(boolean systemError) {
+      this.systemError = systemError;
    }
 }

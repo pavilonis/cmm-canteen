@@ -4,6 +4,7 @@ import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Lists;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
+import javafx.concurrent.Task;
 import javafx.scene.input.KeyEvent;
 import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import lt.pavilonis.monpikas.client.model.Card;
@@ -11,6 +12,7 @@ import lt.pavilonis.monpikas.client.model.CardBig;
 import lt.pavilonis.monpikas.client.model.CardSmall;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.HttpClientErrorException;
@@ -20,6 +22,7 @@ import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Runtime.getRuntime;
 import static java.util.Arrays.asList;
 import static lt.pavilonis.monpikas.client.App.root;
 import static lt.pavilonis.monpikas.client.App.stage;
@@ -28,6 +31,9 @@ import static lt.pavilonis.monpikas.client.App.stage;
 public class ViewController {
 
    private static final Logger LOG = Logger.getLogger(ViewController.class.getSimpleName());
+
+   @Value("${Audio.SystemErrorAudioPath}")
+   private String PLAY_SYS_ERROR_SOUND_CMD;
 
    @Autowired
    private CardBig first;
@@ -39,10 +45,13 @@ public class ViewController {
    private CardSmall forth;
    @Autowired
    private CardSmall fifth;
+
    @Autowired
    private BarcodeScannerInputHandler inputHandler;
+
    @Autowired
    private UserRequestService userRequestService;
+
    private double y = 20;
    private int i;
 
@@ -99,11 +108,14 @@ public class ViewController {
                dto = new ClientPupilDto("Nežinoma klaida!");
                LOG.info("HttpClientErrorException - Unknown error: " + e1);
             }
+            playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
          } catch (ConnectException ce) {
             dto = new ClientPupilDto("Nežinoma klaida!");
             LOG.info("ConnectException - unknown error: " + ce);
+            playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
          } catch (Exception e) {
             dto = new ClientPupilDto("Nežinoma klaida!");
+            playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
             LOG.info("Exception - unknown error: " + e);
          }
          clientPupilDtos.add(dto);
@@ -128,5 +140,17 @@ public class ViewController {
             return true;
       }
       return false;
+   }
+
+   public void playErrorSound(String errorSoundCmd) {
+      Thread th = new Thread(new Task<Void>() {
+         @Override
+         protected Void call() throws Exception {
+            getRuntime().exec(errorSoundCmd);
+            return null;
+         }
+      });
+      th.setDaemon(true);
+      th.start();
    }
 }

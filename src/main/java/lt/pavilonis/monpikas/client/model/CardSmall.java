@@ -73,7 +73,7 @@ public class CardSmall extends Card {
    public void update() {
       if (dto != null) {
          checkIfDinnerAllowed();
-         if (!dto.isError()) {
+         if (!dto.isSystemError()) {
             setPhoto();
          }
          ensureVisible();
