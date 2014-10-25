@@ -60,13 +60,17 @@ public class CardSmall extends Card {
 
    @Override
    public void update() {
-      double originY = getTranslateY();
-      translate.setToY(220);
-      translate.setOnFinished(event -> {
-         sleepAndRun(originY);
+      if (dto != null) {
+         double originY = getTranslateY();
+         translate.setToY(220);
+         translate.setOnFinished(event -> {
+            sleepAndRun(originY);
+            next.update();
+         });
+         translate.play();
+      } else {
          next.update();
-      });
-      translate.play();
+      }
    }
 
    public void setNext(Card next) {

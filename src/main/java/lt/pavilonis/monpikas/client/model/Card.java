@@ -1,7 +1,5 @@
 package lt.pavilonis.monpikas.client.model;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -23,8 +21,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
+
+import static java.util.Arrays.asList;
 
 public abstract class Card extends Group {
 
@@ -45,12 +44,12 @@ public abstract class Card extends Group {
    protected final Rectangle innerRect = new Rectangle();
    protected final Text nameText = new Text();
    protected final GridPane grid = new GridPane();
-   protected final Duration ANIMATION_DURATION = Duration.seconds(0.2);
+   protected final Duration ANIMATION_DURATION = Duration.seconds(.4);
    protected ImageView userPhoto = new ImageView();
-   FadeTransition fade = new FadeTransition(ANIMATION_DURATION, this);
    TranslateTransition translate = new TranslateTransition(ANIMATION_DURATION, this);
 
    public void initialize() {
+      this.setCache(true);
       setVisible(false);
       PHOTO_CONTAINER.setAlignment(Pos.CENTER);
 
@@ -71,12 +70,10 @@ public abstract class Card extends Group {
       innerRect.setArcWidth(20);
       innerRect.setFill(Color.WHITE);
       innerRect.setStroke(Color.BLACK);
-
-      fade.setInterpolator(Interpolator.EASE_IN);
    }
 
    public List<Transition> getTransitions() {
-      return Arrays.asList(translate, fade);
+      return asList(translate);
    }
 
    public abstract void update();
@@ -93,8 +90,8 @@ public abstract class Card extends Group {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
-            String remoteImgUrl = PHOTO_BASE_PATH + dto.getCardId() + IMAGE_EXTENSION;
+            String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
+            //String remoteImgUrl = PHOTO_BASE_PATH + dto.getCardId() + IMAGE_EXTENSION;
             boolean imgExists = checkRemoteImage(remoteImgUrl);
             Platform.runLater(() -> {
                PHOTO_CONTAINER.getChildren().clear();

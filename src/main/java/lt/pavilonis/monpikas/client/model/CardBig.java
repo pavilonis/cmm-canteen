@@ -1,11 +1,14 @@
 package lt.pavilonis.monpikas.client.model;
 
+import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
+
+import static javafx.geometry.VPos.CENTER;
+
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.RowConstraints;
@@ -14,6 +17,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 import lt.pavilonis.monpikas.client.ViewController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static javafx.animation.Interpolator.EASE_IN;
 
 @Component
 public class CardBig extends Card {
@@ -52,6 +57,7 @@ public class CardBig extends Card {
    private final SVGPath ICON_STATUS_REJECT = new SVGPath();
    private final FlowPane STATUS_MSG_FLOW_PANE = new FlowPane();
    private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION, this);
+   private final FadeTransition fade = new FadeTransition(new Duration(700), this);
 
    @Override
    public void initialize() {
@@ -85,11 +91,11 @@ public class CardBig extends Card {
       grid.getColumnConstraints().add(columnConstraint);
 
       RowConstraints rcTop = new RowConstraints(480);
-      rcTop.setValignment(VPos.CENTER);
+      rcTop.setValignment(CENTER);
       RowConstraints rcMiddle = new RowConstraints(180);
-      rcMiddle.setValignment(VPos.CENTER);
+      rcMiddle.setValignment(CENTER);
       RowConstraints rcBottom = new RowConstraints(160);
-      rcBottom.setValignment(VPos.CENTER);
+      rcBottom.setValignment(CENTER);
 
       grid.getRowConstraints().addAll(rcTop, rcMiddle, rcBottom);
       grid.add(PHOTO_CONTAINER, 0, 0);
@@ -114,37 +120,38 @@ public class CardBig extends Card {
       getChildren().add(outerRect);
       getChildren().add(innerRect);
       getChildren().add(grid);
+
+      fade.setInterpolator(EASE_IN);
    }
 
    @Override
    public void update() {
-      if (dto != null) {
-         double originX = getTranslateX();
-         double originY = getTranslateY();
-         translate.setToX(703);
-         translate.setToY(-328);
-         scale.setToX(1.4);
-         scale.setToY(.245);
-         fade.setFromValue(1);
-         fade.setToValue(0);
-         fade.setOnFinished(event -> {
-            setScaleX(1);
-            setScaleY(1);
-            setTranslateX(originX);
-            setTranslateY(originY);
-            fade.setFromValue(0);
-            fade.setToValue(1);
-            fade.play();
-            updateData();
-            fade.setOnFinished(event2 -> {
-               fade.setOnFinished(null);
-               setPhoto();
-            });
-         });
-         scale.play();
-         translate.play();
+
+      double originX = getTranslateX();
+      double originY = getTranslateY();
+      translate.setToX(703);
+      translate.setToY(-328);
+      scale.setToX(1.4);
+      scale.setToY(.245);
+      fade.setFromValue(1);
+      fade.setToValue(0);
+      fade.setOnFinished(event -> {
+         updateData();
+         setScaleX(1);
+         setScaleY(1);
+         setTranslateX(originX);
+         setTranslateY(originY);
+         fade.setFromValue(0);
+         fade.setToValue(1);
          fade.play();
-      }
+         fade.setOnFinished(event2 -> {
+            fade.setOnFinished(null);
+            ensureVisible();
+         });
+      });
+      scale.play();
+      translate.play();
+      fade.play();
    }
 
    private void updateData() {
@@ -167,7 +174,6 @@ public class CardBig extends Card {
          }
          setPhoto();
       }
-      ensureVisible();
    }
 
    @Override
