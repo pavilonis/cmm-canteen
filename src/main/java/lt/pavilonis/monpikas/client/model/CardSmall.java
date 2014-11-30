@@ -60,7 +60,7 @@ public class CardSmall extends Card {
 
    @Override
    public void update() {
-      if (dto != null) {
+      if (response != null) {
          double originY = getTranslateY();
          translate.setToY(220);
          translate.setOnFinished(event -> {
@@ -73,6 +73,10 @@ public class CardSmall extends Card {
       }
    }
 
+   private void superupdate() {
+      super.update();
+   }
+
    public void setNext(Card next) {
       this.next = next;
    }
@@ -81,14 +85,12 @@ public class CardSmall extends Card {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            sleep((long) ANIMATION_DURATION.toMillis()*5);
+            sleep((long) ANIMATION_DURATION.toMillis() * 5);
             Platform.runLater(() -> {
                setTranslateY(originY);
-               if (dto != null) {
-                  checkIfDinnerAllowed();
-                  if (!dto.isSystemError()) {
-                     setPhoto();
-                  }
+               if (response != null) {
+                  superupdate();
+                  setPhoto();
                   ensureVisible();
                }
             });

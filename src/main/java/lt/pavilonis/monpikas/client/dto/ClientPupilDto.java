@@ -1,40 +1,34 @@
 package lt.pavilonis.monpikas.client.dto;
 
+import javafx.scene.image.Image;
+import lt.pavilonis.monpikas.client.model.Portion;
+
 import java.io.Serializable;
 
 public class ClientPupilDto implements Serializable {
 
-   private static final long serialVersionUID = 1L;
-   private String cardId;
+
+   private long cardId;
    private String name;
-   private boolean dinnerPermitted;
-   private boolean hadDinnerToday;
-   private boolean systemError;
+   private Portion portion;
+   private String grade;
+   private Image image;
 
    public ClientPupilDto() {
    }
 
-   public ClientPupilDto(String cardId, String name, boolean dinnerPermitted, boolean hadDinnerToday) {
+   public ClientPupilDto(long cardId, String name, Portion portion, String grade) {
       this.cardId = cardId;
       this.name = name;
-      this.dinnerPermitted = dinnerPermitted;
-      this.hadDinnerToday = hadDinnerToday;
+      this.portion = portion;
+      this.grade = grade;
    }
 
-   //for system error events
-   public ClientPupilDto(String errorMsg) {
-      this.systemError = true;
-      this.cardId = "0";
-      this.name = errorMsg;
-      this.dinnerPermitted = false;
-      this.hadDinnerToday = false;
-   }
-
-   public String getCardId() {
+   public long getCardId() {
       return cardId;
    }
 
-   public void setCardId(String cardId) {
+   public void setCardId(long cardId) {
       this.cardId = cardId;
    }
 
@@ -46,27 +40,27 @@ public class ClientPupilDto implements Serializable {
       this.name = name;
    }
 
-   public boolean isDinnerPermitted() {
-      return dinnerPermitted;
+   public Portion getPortion() {
+      return portion;
    }
 
-   public void setDinnerPermitted(boolean dinnerPermitted) {
-      this.dinnerPermitted = dinnerPermitted;
+   public void setPortion(Portion portion) {
+      this.portion = portion;
    }
 
-   public boolean isHadDinnerToday() {
-      return hadDinnerToday;
+   public String getGrade() {
+      return grade;
    }
 
-   public void setHadDinnerToday(boolean hadDinnerToday) {
-      this.hadDinnerToday = hadDinnerToday;
+   public void setGrade(String grade) {
+      this.grade = grade;
    }
 
-   public boolean isSystemError() {
-      return systemError;
+   public Image getImage() {
+      return image;
    }
 
-   public void setSystemError(boolean systemError) {
-      this.systemError = systemError;
+   public void setImage(Image image) {
+      this.image = image;
    }
 }

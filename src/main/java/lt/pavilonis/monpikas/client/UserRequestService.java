@@ -13,11 +13,12 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.ConnectException;
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+
+import static java.util.Arrays.asList;
 
 @Service
 public class UserRequestService {
@@ -34,21 +35,24 @@ public class UserRequestService {
    @Autowired
    private RestTemplate rt;
 
-   public ClientPupilDto requestUser(String barcode) throws ConnectException {
+   @PostConstruct
+   private void setErrorHandler() {
+      rt.setErrorHandler(new CustomResponseErrorHandler());
+   }
+
+   public ResponseEntity<ClientPupilDto> requestUser(String barcode) {
 
       String creds = username + ":" + password;
       byte[] base64credsBytes = Base64.getEncoder().encode(creds.getBytes());
 
       HttpHeaders headers = new HttpHeaders();
       headers.add("Authorization", "Basic " + new String(base64credsBytes));
-      headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+      headers.setAccept(asList(MediaType.APPLICATION_JSON));
 
       String url = pupilRequestUrl + barcode;
       HttpEntity<String> request = new HttpEntity<>(headers);
       rt.setMessageConverters(getMessageConverters());
-      ResponseEntity<ClientPupilDto> response = rt.exchange(url, HttpMethod.GET, request, ClientPupilDto.class);
-
-      return response.getBody();
+      return rt.exchange(url, HttpMethod.GET, request, ClientPupilDto.class);
    }
 
    private List<HttpMessageConverter<?>> getMessageConverters() {

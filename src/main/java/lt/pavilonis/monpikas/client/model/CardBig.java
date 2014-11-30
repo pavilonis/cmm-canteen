@@ -4,14 +4,17 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Transition;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -40,12 +43,6 @@ public class CardBig extends Card {
    @Value("${Audio.Error}")
    private String PLAY_ERROR_SOUND_CMD;
 
-   @Value("${Card.Message.NoPermission}")
-   private String NO_PERMISSION_MSG;
-
-   @Value("${Card.Message.AlreadyHadDinner}")
-   private String ALREADY_HAD_DINNER_MSG;
-
    @Value("${Card.Icon.StatusOkContent}")
    private String ICON_STATUS_OK_CONTENT;
 
@@ -55,12 +52,13 @@ public class CardBig extends Card {
    @Autowired
    ViewController controller;
 
-   private final Text REJECT_TEXT = new Text();
+   private final Text DESCRIPTION = new Text();
    private final SVGPath ICON_STATUS_OK = new SVGPath();
    private final SVGPath ICON_STATUS_REJECT = new SVGPath();
    private final FlowPane STATUS_MSG_FLOW_PANE = new FlowPane();
    private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION.multiply(5), this);
    private final FadeTransition fade = new FadeTransition(ANIMATION_DURATION.multiply(5), this);
+   private final Rectangle gradeRect = new Rectangle();
 
    @Override
    public void initialize() {
@@ -76,8 +74,8 @@ public class CardBig extends Card {
       ICON_NO_PHOTO.setStrokeWidth(0.2);
 
       ICON_STATUS_OK.setContent(ICON_STATUS_OK_CONTENT);
-      ICON_STATUS_OK.setScaleX(6);
-      ICON_STATUS_OK.setScaleY(6);
+      ICON_STATUS_OK.setScaleX(5);
+      ICON_STATUS_OK.setScaleY(5);
       ICON_STATUS_OK.setFill(Color.GREEN);
       ICON_STATUS_OK.setStroke(Color.DARKGREY);
       ICON_STATUS_OK.setStrokeWidth(0.2);
@@ -89,7 +87,7 @@ public class CardBig extends Card {
       ICON_STATUS_REJECT.setStroke(Color.DARKGREY);
       ICON_STATUS_REJECT.setStrokeWidth(0.2);
 
-      REJECT_TEXT.setFont(Font.font("SansSerif", 40));
+      DESCRIPTION.setFont(Font.font("SansSerif", 50));
 
       ColumnConstraints columnConstraint = new ColumnConstraints(540);
       columnConstraint.setHalignment(HPos.CENTER);
@@ -118,27 +116,42 @@ public class CardBig extends Card {
       innerRect.setWidth(540);
       innerRect.setHeight(820);
 
+      gradeRect.setX(390);
+      gradeRect.setY(355);
+      gradeRect.setWidth(160);
+      gradeRect.setHeight(120);
+      gradeRect.setArcHeight(20);
+      gradeRect.setArcWidth(20);
+      gradeRect.setFill(Color.WHITE);
+      gradeRect.setStroke(Color.BLACK);
+
+      gradeText.setFont(Font.font("SansSerif", 70));
+      gradeText.setY(440);
+      gradeText.setX(400);
+
       STATUS_MSG_FLOW_PANE.setAlignment(Pos.CENTER);
       STATUS_MSG_FLOW_PANE.setHgap(60);
       grid.add(STATUS_MSG_FLOW_PANE, 0, 2);
       grid.setPadding(new Insets(20));
+
       getChildren().add(outerRect);
       getChildren().add(innerRect);
       getChildren().add(grid);
+      getChildren().add(gradeRect);
+      getChildren().add(gradeText);
 
       fade.setInterpolator(EASE_IN);
    }
 
    @Override
    public void update() {
-
       double originX = getTranslateX();
       double originY = getTranslateY();
       translate.setToX(605);
       translate.setToY(-655);
       translate.setOnFinished(event -> {
          setVisible(false);
-         updateData();
+         super.update();
          setTranslateX(originX);
          setTranslateY(originY);
          sleepAndRun();
@@ -146,26 +159,24 @@ public class CardBig extends Card {
       translate.play();
    }
 
-   private void updateData() {
-      STATUS_MSG_FLOW_PANE.getChildren().clear();
-      if (dto.isSystemError()) {
-         checkIfDinnerAllowed();
-         STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_REJECT);
-         controller.playErrorSound(PLAY_SYS_ERROR_SOUND_CMD);
+   @Override
+   protected void decorate(String title, Color color, Object desc) {
+      super.decorate(title, color, desc);
+
+      ObservableList<Node> container = STATUS_MSG_FLOW_PANE.getChildren();
+      container.clear();
+
+      if (color == Color.GREEN) {
+         container.add(ICON_STATUS_OK);
+         controller.playErrorSound(PLAY_SUCCESS_SOUND_CMD);
       } else {
-         if (checkIfDinnerAllowed()) {
-            STATUS_MSG_FLOW_PANE.getChildren().add(ICON_STATUS_OK);
-            controller.playErrorSound(PLAY_SUCCESS_SOUND_CMD);
-         } else {
-            controller.playErrorSound(PLAY_ERROR_SOUND_CMD);
-            REJECT_TEXT.setText(
-                  (!dto.isDinnerPermitted())
-                        ? NO_PERMISSION_MSG
-                        : ALREADY_HAD_DINNER_MSG
-            );
-            STATUS_MSG_FLOW_PANE.getChildren().addAll(ICON_STATUS_REJECT, REJECT_TEXT);
-         }
+         container.add(ICON_STATUS_REJECT);
+         controller.playErrorSound(PLAY_ERROR_SOUND_CMD);
       }
+      DESCRIPTION.setText(desc.toString());
+      container.add(DESCRIPTION);
+
+      gradeText.setText(response.getBody() != null ? response.getBody().getGrade() : "");
    }
 
    @Override

@@ -10,19 +10,19 @@ import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
 import lt.pavilonis.monpikas.client.model.Card;
 import lt.pavilonis.monpikas.client.model.CardBig;
 import lt.pavilonis.monpikas.client.model.CardSmall;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 
 import javax.annotation.PostConstruct;
-import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.google.common.collect.Lists.reverse;
@@ -30,11 +30,17 @@ import static java.lang.Runtime.getRuntime;
 import static java.util.Arrays.asList;
 import static lt.pavilonis.monpikas.client.App.root;
 import static lt.pavilonis.monpikas.client.App.stage;
+import static org.slf4j.LoggerFactory.getLogger;
+import static org.springframework.http.HttpStatus.ACCEPTED;
+import static org.springframework.http.HttpStatus.ALREADY_REPORTED;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @Controller
 public class ViewController {
 
-   private static final Logger LOG = Logger.getLogger(ViewController.class.getSimpleName());
+   private static final Logger LOG = getLogger(ViewController.class);
 
    @Value("${Images.PhotoBasePath}")
    private String PHOTO_BASE_PATH;
@@ -60,16 +66,8 @@ public class ViewController {
    private UserRequestService userRequestService;
 
    private double y = 20;
-   private int i;
 
-   private EvictingQueue<ClientPupilDto> clientPupilDtos = EvictingQueue.create(5);
-
-   private LinkedHashMap<String, Image> images = new LinkedHashMap<String, Image>(5) {
-      @Override
-      protected boolean removeEldestEntry(java.util.Map.Entry<String, Image> entry) {
-         return size() > 5;
-      }
-   };
+   private EvictingQueue<ResponseEntity<ClientPupilDto>> responses = EvictingQueue.create(5);
 
    private List<Card> cards;
    private List<Transition> transitions = new ArrayList<>();
@@ -80,7 +78,6 @@ public class ViewController {
       forth.setNext(third);
       third.setNext(second);
       second.setNext(first);
-
       cards = asList(first, second, third, forth, fifth);
       cards.forEach(c -> {
          c.initialize();
@@ -104,46 +101,34 @@ public class ViewController {
    }
 
    public void scanEventAction(String barcode) {
+
       if (transitionActive()) {
          LOG.info("Transition is active, canceled request for bc: " + barcode);
-      } else {
-         LOG.info("Requesting user with bc: " + barcode);
-         ClientPupilDto dto;
-         try {
-            dto = userRequestService.requestUser(barcode);
-         } catch (HttpClientErrorException e1) {
-            if (e1.getStatusCode() == HttpStatus.NOT_FOUND) {
-               dto = new ClientPupilDto("Nėra ryšio");
-               LOG.info("HttpClientErrorException - no connection: " + e1);
-            } else if (e1.getStatusCode() == HttpStatus.BAD_REQUEST) {
-               dto = new ClientPupilDto("Nerasta sistemoje!");
-               LOG.info("HttpClientErrorException - pupil not found: " + e1);
-            } else {
-               dto = new ClientPupilDto("Nežinoma klaida!");
-               LOG.info("HttpClientErrorException - Unknown error: " + e1);
-            }
-         } catch (ConnectException ce) {
-            dto = new ClientPupilDto("Nežinoma klaida!");
-            LOG.info("ConnectException - unknown error: " + ce);
-         } catch (Exception e) {
-            dto = new ClientPupilDto("Nežinoma klaida!");
-            LOG.info("Exception - unknown error: " + e);
-         }
-         clientPupilDtos.add(dto);
-         addNewImage(dto.getCardId());
-         updateView();
+         return;
       }
+
+      LOG.info("Requesting user with barcode: " + barcode);
+
+      ResponseEntity<ClientPupilDto> response = new ResponseEntity<>(OK);
+      try {
+         response = userRequestService.requestUser(barcode);
+      } catch (ResourceAccessException e) {
+         LOG.error("no connection to server: " + e);
+         response = new ResponseEntity<>(SERVICE_UNAVAILABLE);
+      } catch (HttpStatusCodeException e) {
+         LOG.error("Unknown error: " + e);
+      }
+
+      responses.add(response);
+      getImage(barcode, response);
+      updateView();
    }
 
    public void updateView() {
-      i = 0;
-      reverse(new ArrayList<>(clientPupilDtos)).forEach(
-            dto -> {
-               cards.get(i).setDto(dto);
-               cards.get(i).setImage(images.get(dto.getCardId()));
-               i++;
-            }
-      );
+      int i = 0;
+      for (ResponseEntity<ClientPupilDto> response : reverse(new ArrayList<>(responses))) {
+         cards.get(i++).setResponse(response);
+      }
       fifth.update();
    }
 
@@ -167,10 +152,14 @@ public class ViewController {
       th.start();
    }
 
-   private void addNewImage(String id) {
-      String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";
-      //String remoteImgUrl = PHOTO_BASE_PATH + id + IMAGE_EXTENSION;
-      images.put(id, new Image(remoteImgUrl, 0, 0, true, false, true));
+   private void getImage(String id, ResponseEntity<ClientPupilDto> response) {
+      HttpStatus code = response.getStatusCode();
+      boolean pupilExists = code == ACCEPTED || code == ALREADY_REPORTED || code == FORBIDDEN;
+      //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";       //for testing
+      String remoteImgUrl = PHOTO_BASE_PATH + id + IMAGE_EXTENSION;
+      if (pupilExists) {
+         response.getBody().setImage(new Image(remoteImgUrl, 0, 0, true, false, true));
+      }
    }
 
    private boolean checkRemoteImage(String url) {

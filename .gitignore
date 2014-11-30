@@ -3,3 +3,6 @@
 target
 out
 monpikas.log
+
+pom.xml.releaseBackup
+release.properties

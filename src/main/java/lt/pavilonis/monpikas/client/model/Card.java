@@ -3,10 +3,11 @@ package lt.pavilonis.monpikas.client.model;
 import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.effect.DropShadow;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -17,28 +18,41 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static javafx.scene.paint.Color.GREEN;
+import static javafx.scene.paint.Color.RED;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class Card extends Group {
 
-   protected ClientPupilDto dto;
+   private static final Logger LOG = getLogger(Card.class);
+
+   protected ResponseEntity<ClientPupilDto> response;
 
    @Value("${Card.Icon.NoPhotoContent}")
    protected String ICON_NO_PHOTO_CONTENT_PATH;
+
+   @Value("${Card.Message.NoPermission}")
+   private String NO_PERMISSION_MSG;
+
+   @Value("${Card.Message.AlreadyHadDinner}")
+   private String ALREADY_HAD_MEAL_MSG;
 
    protected final FlowPane PHOTO_CONTAINER = new FlowPane();
    protected final SVGPath ICON_NO_PHOTO = new SVGPath();
    protected final Rectangle outerRect = new Rectangle();
    protected final Rectangle innerRect = new Rectangle();
    protected final Text nameText = new Text();
+   protected final Text gradeText = new Text();
    protected final GridPane grid = new GridPane();
    protected final Duration ANIMATION_DURATION = Duration.seconds(.2);
    protected ImageView imageView = new ImageView();
-   protected Image image;
    TranslateTransition translate = new TranslateTransition(ANIMATION_DURATION, this);
 
    public void initialize() {
@@ -56,7 +70,7 @@ public abstract class Card extends Group {
       outerRect.setArcHeight(20);
       outerRect.setArcWidth(20);
       outerRect.setStroke(Color.BLACK);
-      outerRect.setEffect(new DropShadow(10, 5, 5, Color.DARKGRAY));
+      //outerRect.setEffect(new DropShadow(10, 5, 5, Color.DARKGRAY));
 
       innerRect.setArcHeight(20);
       innerRect.setArcWidth(20);
@@ -68,14 +82,49 @@ public abstract class Card extends Group {
       return asList(translate);
    }
 
-   public abstract void update();
+   protected void update() {
+      ClientPupilDto dto = response.getBody();
 
-   //TODO refactor, should only check, not do some logic
-   protected boolean checkIfDinnerAllowed() {
-      nameText.setText(dto.getName());
-      boolean allowed = dto.isDinnerPermitted() && !dto.isHadDinnerToday();
-      outerRect.setFill((allowed) ? Color.GREEN : Color.RED);
-      return allowed;
+      switch (response.getStatusCode()) {
+
+         case ACCEPTED:
+            decorate(dto.getName(), GREEN, dto.getPortion());
+            LOG.info("Pupil " + dto.getName() + " is getting his meal");
+            break;
+
+         case ALREADY_REPORTED:
+            decorate(dto.getName(), RED, ALREADY_HAD_MEAL_MSG);
+            LOG.warn("Pupil " + dto.getName() + " already had hist meal");
+            break;
+
+         case FORBIDDEN:
+            decorate(dto.getName(), RED, NO_PERMISSION_MSG);
+            LOG.warn("Pupil " + dto.getName() + " has no permission");
+            break;
+
+         case NOT_FOUND:
+            decorate("Nežinomas mokinys", RED, "");
+            LOG.warn("Pupil not found: ");
+            break;
+
+         case SERVICE_UNAVAILABLE:
+            decorate("Serveris nerastas", RED, "");
+            break;
+
+         case INTERNAL_SERVER_ERROR:
+            decorate("Serveris klaida", RED, "");
+            LOG.error("Server error");
+            break;
+
+         default:
+            decorate("Nežinoma klaida", RED, "");
+            LOG.error("Unknown error");
+      }
+   }
+
+   protected void decorate(String name, Color color, Object desc) {
+      nameText.setText(name);
+      outerRect.setFill(color);
    }
 
    protected void setPhoto() {
@@ -83,12 +132,13 @@ public abstract class Card extends Group {
          @Override
          protected Void call() throws Exception {
             Platform.runLater(() -> {
-               PHOTO_CONTAINER.getChildren().clear();
-               if (image.getProgress() == 1.0 && (image.getWidth() == 0.0 || image.getHeight() == 0.0)) {
-                  PHOTO_CONTAINER.getChildren().add(ICON_NO_PHOTO);
+               ObservableList<Node> container = PHOTO_CONTAINER.getChildren();
+               container.clear();
+               if (image() == null || image().getProgress() == 1.0 && (image().getWidth() == 0.0 || image().getHeight() == 0.0)) {
+                  container.add(ICON_NO_PHOTO);
                } else {
-                  imageView.setImage(image);
-                  PHOTO_CONTAINER.getChildren().add(imageView);
+                  imageView.setImage(image());
+                  container.add(imageView);
                   imageView.setY(50);
                }
             });
@@ -99,8 +149,8 @@ public abstract class Card extends Group {
       th.start();
    }
 
-   public void setDto(ClientPupilDto dto) {
-      this.dto = dto;
+   public void setResponse(ResponseEntity<ClientPupilDto> response) {
+      this.response = response;
    }
 
    protected void ensureVisible() {
@@ -109,7 +159,9 @@ public abstract class Card extends Group {
       }
    }
 
-   public void setImage(Image image) {
-      this.image = image;
+   private Image image() {
+      return response.getBody() != null
+            ? response.getBody().getImage()
+            : null;
    }
 }
