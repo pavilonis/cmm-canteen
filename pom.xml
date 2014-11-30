@@ -4,7 +4,7 @@
 
    <groupId>lt.pavilonis.monpikas</groupId>
    <artifactId>monpikas-client</artifactId>
-   <version>1.1-SNAPSHOT</version>
+   <version>1.1</version>
    <properties>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
@@ -92,9 +92,9 @@
    </build>
 
    <scm>
-      <connection>scm:git:ssh://git@github.com/snp0k/monpikas-client.git</connection>
-      <developerConnection>scm:git:ssh://git@github.com/snp0k/monpikas-client.git</developerConnection>
-      <url>https://github.com/snp0k/monpikas-client</url>
+      <connection>scm:git:ssh://git@bitbucket.org:snipok/monpikas-client.git</connection>
+      <developerConnection>scm:git:ssh://git@bitbucket.org:snipok/monpikas-client.git</developerConnection>
+      <url>https://bitbucket.org/snipok/monpikas-client.git</url>
       <tag>HEAD</tag>
    </scm>
 
