@@ -7,7 +7,6 @@ import java.io.Serializable;
 
 public class ClientPupilDto implements Serializable {
 
-
    private long cardId;
    private String name;
    private Portion portion;

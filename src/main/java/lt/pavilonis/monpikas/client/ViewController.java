@@ -40,7 +40,7 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 @Controller
 public class ViewController {
 
-   private static final Logger LOG = getLogger(ViewController.class);
+   private static final Logger LOG = getLogger(ViewController.class.getSimpleName());
 
    @Value("${Images.PhotoBasePath}")
    private String PHOTO_BASE_PATH;
@@ -120,15 +120,14 @@ public class ViewController {
       }
 
       responses.add(response);
-      getImage(barcode, response);
-      updateView();
-   }
+      setDtoImage(barcode, response);
 
-   public void updateView() {
       int i = 0;
-      for (ResponseEntity<ClientPupilDto> response : reverse(new ArrayList<>(responses))) {
-         cards.get(i++).setResponse(response);
+      //update cards content
+      for (ResponseEntity<ClientPupilDto> r : reverse(new ArrayList<>(responses))) {
+         cards.get(i++).setResponse(r);
       }
+      //start visual update sequence
       fifth.update();
    }
 
@@ -152,7 +151,7 @@ public class ViewController {
       th.start();
    }
 
-   private void getImage(String id, ResponseEntity<ClientPupilDto> response) {
+   private void setDtoImage(String id, ResponseEntity<ClientPupilDto> response) {
       HttpStatus code = response.getStatusCode();
       boolean pupilExists = code == ACCEPTED || code == ALREADY_REPORTED || code == FORBIDDEN;
       //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";       //for testing

@@ -31,7 +31,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class Card extends Group {
 
-   private static final Logger LOG = getLogger(Card.class);
+   private static final Logger LOG = getLogger(Card.class.getSimpleName());
 
    protected ResponseEntity<ClientPupilDto> response;
 
@@ -89,22 +89,22 @@ public abstract class Card extends Group {
 
          case ACCEPTED:
             decorate(dto.getName(), GREEN, dto.getPortion());
-            LOG.info("Pupil " + dto.getName() + " is getting his meal");
+            log("Pupil " + dto.getName() + " is getting his meal");
             break;
 
          case ALREADY_REPORTED:
             decorate(dto.getName(), RED, ALREADY_HAD_MEAL_MSG);
-            LOG.warn("Pupil " + dto.getName() + " already had hist meal");
+            log("Pupil " + dto.getName() + " already had hist meal");
             break;
 
          case FORBIDDEN:
             decorate(dto.getName(), RED, NO_PERMISSION_MSG);
-            LOG.warn("Pupil " + dto.getName() + " has no permission");
+            log("Pupil " + dto.getName() + " has no permission");
             break;
 
          case NOT_FOUND:
             decorate("Nežinomas mokinys", RED, "");
-            LOG.warn("Pupil not found: ");
+            log("Pupil not found: ");
             break;
 
          case SERVICE_UNAVAILABLE:
@@ -120,6 +120,10 @@ public abstract class Card extends Group {
             decorate("Nežinoma klaida", RED, "");
             LOG.error("Unknown error");
       }
+   }
+
+   private void log(String text) {
+      if (this instanceof CardBig) LOG.info(text);
    }
 
    protected void decorate(String name, Color color, Object desc) {
