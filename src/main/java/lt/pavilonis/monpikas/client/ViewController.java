@@ -120,7 +120,7 @@ public class ViewController {
       }
 
       responses.add(response);
-      setDtoImage(barcode, response);
+      setDtoImage(response);
 
       int i = 0;
       //update cards content
@@ -151,13 +151,14 @@ public class ViewController {
       th.start();
    }
 
-   private void setDtoImage(String id, ResponseEntity<ClientPupilDto> response) {
+   private void setDtoImage(ResponseEntity<ClientPupilDto> response) {
       HttpStatus code = response.getStatusCode();
       boolean pupilExists = code == ACCEPTED || code == ALREADY_REPORTED || code == FORBIDDEN;
       //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";       //for testing
-      String remoteImgUrl = PHOTO_BASE_PATH + id + IMAGE_EXTENSION;
       if (pupilExists) {
-         response.getBody().setImage(new Image(remoteImgUrl, 0, 0, true, false, true));
+         response.getBody().setImage(
+               new Image(PHOTO_BASE_PATH + response.getBody().getId() + IMAGE_EXTENSION,
+                     0, 0, true, false, true));
       }
    }
 

@@ -38,7 +38,7 @@ public class CardBig extends Card {
    private String PLAY_SUCCESS_SOUND_CMD;
 
    @Value("${Audio.SystemError}")
-   public String PLAY_SYS_ERROR_SOUND_CMD;
+   private String PLAY_SYS_ERROR_SOUND_CMD;
 
    @Value("${Audio.Error}")
    private String PLAY_ERROR_SOUND_CMD;
