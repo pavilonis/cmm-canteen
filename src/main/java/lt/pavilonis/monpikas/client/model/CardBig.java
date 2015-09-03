@@ -22,6 +22,7 @@ import javafx.scene.text.TextAlignment;
 import lt.pavilonis.monpikas.client.ViewController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -166,12 +167,12 @@ public class CardBig extends Card {
       ObservableList<Node> container = STATUS_MSG_FLOW_PANE.getChildren();
       container.clear();
 
-      if (color == Color.GREEN) {
+      if (response.getStatusCode() == HttpStatus.ACCEPTED) {
          container.add(ICON_STATUS_OK);
-         controller.playErrorSound(PLAY_SUCCESS_SOUND_CMD);
+         controller.playSound(PLAY_SUCCESS_SOUND_CMD);
       } else {
          container.add(ICON_STATUS_REJECT);
-         controller.playErrorSound(PLAY_ERROR_SOUND_CMD);
+         controller.playSound(PLAY_ERROR_SOUND_CMD);
       }
       DESCRIPTION.setText(desc.toString());
       container.add(DESCRIPTION);

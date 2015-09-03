@@ -1,7 +1,8 @@
 package lt.pavilonis.monpikas.client.dto;
 
 import javafx.scene.image.Image;
-import lt.pavilonis.monpikas.client.model.Portion;
+import lt.pavilonis.monpikas.client.enumeration.PupilType;
+import lt.pavilonis.monpikas.client.model.Meal;
 
 import java.io.Serializable;
 
@@ -9,19 +10,10 @@ public class ClientPupilDto implements Serializable {
 
    private long id;
    private String name;
-   private Portion portion;
+   private Meal meal;
    private String grade;
+   private PupilType type;
    private Image image;
-
-   public ClientPupilDto() {
-   }
-
-   public ClientPupilDto(long id, String name, Portion portion, String grade) {
-      this.id = id;
-      this.name = name;
-      this.portion = portion;
-      this.grade = grade;
-   }
 
    public long getId() {
       return id;
@@ -39,12 +31,12 @@ public class ClientPupilDto implements Serializable {
       this.name = name;
    }
 
-   public Portion getPortion() {
-      return portion;
+   public Meal getMeal() {
+      return meal;
    }
 
-   public void setPortion(Portion portion) {
-      this.portion = portion;
+   public void setMeal(Meal meal) {
+      this.meal = meal;
    }
 
    public String getGrade() {
@@ -61,5 +53,13 @@ public class ClientPupilDto implements Serializable {
 
    public void setImage(Image image) {
       this.image = image;
+   }
+
+   public PupilType getType() {
+      return type;
+   }
+
+   public void setType(PupilType type) {
+      this.type = type;
    }
 }

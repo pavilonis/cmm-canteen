@@ -31,6 +31,7 @@ public class CustomResponseErrorHandler extends DefaultResponseErrorHandler {
             || statusCode == HttpStatus.FORBIDDEN
             || statusCode == HttpStatus.BAD_REQUEST
             || statusCode == HttpStatus.NOT_FOUND
-            || statusCode == HttpStatus.INTERNAL_SERVER_ERROR);
+            || statusCode == HttpStatus.INTERNAL_SERVER_ERROR
+            || statusCode == HttpStatus.MULTIPLE_CHOICES);
    }
 }

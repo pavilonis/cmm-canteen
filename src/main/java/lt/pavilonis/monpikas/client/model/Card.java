@@ -18,13 +18,16 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
+import lt.pavilonis.monpikas.client.enumeration.PupilType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static javafx.scene.paint.Color.BLUE;
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.RED;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -79,7 +82,7 @@ public abstract class Card extends Group {
    }
 
    public List<Transition> getTransitions() {
-      return asList(translate);
+      return Collections.singletonList(translate);
    }
 
    protected void update() {
@@ -88,7 +91,7 @@ public abstract class Card extends Group {
       switch (response.getStatusCode()) {
 
          case ACCEPTED:
-            decorate(dto.getName(), GREEN, dto.getPortion());
+            decorate(dto.getName(), dto.getType() == PupilType.SOCIAL ? GREEN : BLUE, dto.getMeal());
             log("Pupil " + dto.getName() + " is getting his meal");
             break;
 
@@ -111,8 +114,12 @@ public abstract class Card extends Group {
             decorate("Serveris nerastas", RED, "");
             break;
 
+         case MULTIPLE_CHOICES:
+            decorate("Netinkamas laikas", RED, "");
+            break;
+
          case INTERNAL_SERVER_ERROR:
-            decorate("Serveris klaida", RED, "");
+            decorate("Serverio klaida", RED, "");
             LOG.error("Server error");
             break;
 

@@ -93,10 +93,10 @@ public class ViewController {
       //test event handling
       stage.addEventHandler(KeyEvent.KEY_TYPED, (KeyEvent k) -> {
          if (k.getCharacter().equals("a")) scanEventAction("5002");
-         if (k.getCharacter().equals("b")) scanEventAction("5010");
-         if (k.getCharacter().equals("c")) scanEventAction("0003");
-         if (k.getCharacter().equals("d")) scanEventAction("0004");
-         if (k.getCharacter().equals("e")) scanEventAction("0533");
+         if (k.getCharacter().equals("b")) scanEventAction("6769");
+         if (k.getCharacter().equals("c")) scanEventAction("5016");
+         if (k.getCharacter().equals("d")) scanEventAction("5027");
+         if (k.getCharacter().equals("e")) scanEventAction("5017");
       });
    }
 
@@ -139,11 +139,11 @@ public class ViewController {
       return false;
    }
 
-   public void playErrorSound(String errorSoundCmd) {
+   public void playSound(String soundCmd) {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            getRuntime().exec(errorSoundCmd);
+            getRuntime().exec(soundCmd);
             return null;
          }
       });
@@ -156,9 +156,9 @@ public class ViewController {
       boolean pupilExists = code == ACCEPTED || code == ALREADY_REPORTED || code == FORBIDDEN;
       //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";       //for testing
       if (pupilExists) {
-         response.getBody().setImage(
-               new Image(PHOTO_BASE_PATH + response.getBody().getId() + IMAGE_EXTENSION,
-                     0, 0, true, false, true));
+         String path = PHOTO_BASE_PATH + response.getBody().getId() + IMAGE_EXTENSION;
+         Image image = new Image(path, 0, 0, true, false, true);
+         response.getBody().setImage(image);
       }
    }
 
