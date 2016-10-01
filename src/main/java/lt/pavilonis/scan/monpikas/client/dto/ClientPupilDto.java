@@ -1,8 +1,8 @@
-package lt.pavilonis.monpikas.client.dto;
+package lt.pavilonis.scan.monpikas.client.dto;
 
 import javafx.scene.image.Image;
-import lt.pavilonis.monpikas.client.enumeration.PupilType;
-import lt.pavilonis.monpikas.client.model.Meal;
+import lt.pavilonis.scan.monpikas.client.enumeration.PupilType;
+import lt.pavilonis.scan.monpikas.client.model.Meal;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.scan.monpikas.client;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;

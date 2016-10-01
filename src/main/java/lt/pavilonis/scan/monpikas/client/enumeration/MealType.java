@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client.enumeration;
+package lt.pavilonis.scan.monpikas.client.enumeration;
 
 public enum MealType {
    BREAKFAST,

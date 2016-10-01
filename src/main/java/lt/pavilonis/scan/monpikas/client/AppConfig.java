@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.scan.monpikas.client;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -8,7 +8,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@ComponentScan({"lt.pavilonis.monpikas.client", "resources"})
+@ComponentScan({"lt.pavilonis.scan", "resources"})
 @PropertySource({"inner.properties", "file:/opt/monpikas/monpikas.properties"})
 public class AppConfig {
 

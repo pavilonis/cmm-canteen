@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client.model;
+package lt.pavilonis.scan.monpikas.client.model;
 
 import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
@@ -17,8 +17,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
-import lt.pavilonis.monpikas.client.enumeration.PupilType;
+import lt.pavilonis.scan.monpikas.client.dto.ClientPupilDto;
+import lt.pavilonis.scan.monpikas.client.enumeration.PupilType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static javafx.scene.paint.Color.BLUE;
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.RED;

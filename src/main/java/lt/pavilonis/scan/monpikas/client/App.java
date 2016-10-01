@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.scan.monpikas.client;
 
 import javafx.application.Application;
 import javafx.scene.Group;

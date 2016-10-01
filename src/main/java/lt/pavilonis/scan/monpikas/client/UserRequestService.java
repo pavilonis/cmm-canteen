@@ -1,6 +1,6 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.scan.monpikas.client;
 
-import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
+import lt.pavilonis.scan.monpikas.client.dto.ClientPupilDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 @Service
 public class UserRequestService {
@@ -47,7 +47,7 @@ public class UserRequestService {
 
       HttpHeaders headers = new HttpHeaders();
       headers.add("Authorization", "Basic " + new String(base64credsBytes));
-      headers.setAccept(asList(MediaType.APPLICATION_JSON));
+      headers.setAccept(singletonList(MediaType.APPLICATION_JSON));
 
       String url = pupilRequestUrl + barcode;
       HttpEntity<String> request = new HttpEntity<>(headers);

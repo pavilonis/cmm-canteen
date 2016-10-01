@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client.model;
+package lt.pavilonis.scan.monpikas.client.model;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
@@ -19,7 +19,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import lt.pavilonis.monpikas.client.ViewController;
+import lt.pavilonis.scan.monpikas.client.ViewController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,8 @@
-package lt.pavilonis.monpikas.client.model;
+package lt.pavilonis.scan.monpikas.client.model;
 
 
 import com.google.common.collect.ImmutableMap;
-import lt.pavilonis.monpikas.client.enumeration.MealType;
+import lt.pavilonis.scan.monpikas.client.enumeration.MealType;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;

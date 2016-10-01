@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
 
    <groupId>lt.pavilonis.monpikas</groupId>
@@ -9,58 +10,42 @@
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <spring.version>4.1.5.RELEASE</spring.version>
+      <jackson.version>2.8.2</jackson.version>
    </properties>
+
    <dependencies>
+
+      <!-- COM PORT READER -->
       <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-core</artifactId>
-         <version>${spring.version}</version>
+         <groupId>lt.pavilonis.scan.reader</groupId>
+         <artifactId>com-port-reader</artifactId>
+         <version>1.0</version>
       </dependency>
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-context</artifactId>
-         <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-webmvc</artifactId>
-         <version>${spring.version}</version>
-      </dependency>
+
+      <!-- UTILS -->
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
-         <version>18.0</version>
+         <version>19.0</version>
       </dependency>
 
-      <!--JSON serialization-->
+      <!-- SERIALIZATION -->
       <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
          <artifactId>jackson-core</artifactId>
-         <version>2.4.2</version>
+         <version>${jackson.version}</version>
       </dependency>
       <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
          <artifactId>jackson-databind</artifactId>
-         <version>2.4.2</version>
+         <version>${jackson.version}</version>
       </dependency>
       <dependency>
          <groupId>com.fasterxml.jackson.core</groupId>
          <artifactId>jackson-annotations</artifactId>
-         <version>2.4.2</version>
+         <version>${jackson.version}</version>
       </dependency>
 
-      <!--Logging-->
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-api</artifactId>
-         <version>1.7.7</version>
-      </dependency>
-      <dependency>
-         <groupId>org.slf4j</groupId>
-         <artifactId>slf4j-log4j12</artifactId>
-         <version>1.7.7</version>
-      </dependency>
    </dependencies>
 
    <build>
@@ -83,27 +68,52 @@
                <archive>
                   <manifest>
                      <addClasspath>true</addClasspath>
-                     <mainClass>lt.pavilonis.monpikas.client.App</mainClass>
+                     <mainClass>lt.pavilonis.scan.monpikas.client.App</mainClass>
                   </manifest>
                </archive>
             </configuration>
          </plugin>
+
+         <plugin>
+            <groupId>external.atlassian.jgitflow</groupId>
+            <artifactId>jgitflow-maven-plugin</artifactId>
+            <version>1.0-m5.1</version>
+            <configuration>
+               <flowInitContext>
+                  <masterBranchName>master</masterBranchName>
+                  <developBranchName>develop</developBranchName>
+                  <featureBranchPrefix>feature-</featureBranchPrefix>
+                  <releaseBranchPrefix>release-</releaseBranchPrefix>
+                  <hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
+               </flowInitContext>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <version>2.8.2</version>
+            <configuration>
+               <skip>true</skip>
+            </configuration>
+         </plugin>
+         <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.5</version>
+            <configuration>
+               <source>${maven.compiler.source}</source>
+               <target>${maven.compiler.target}</target>
+               <encoding>UTF-8</encoding>
+            </configuration>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>compile</goal>
+                     <goal>testCompile</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
       </plugins>
    </build>
-
-   <scm>
-      <connection>scm:git:ssh://git@bitbucket.org:snipok/monpikas-client.git</connection>
-      <developerConnection>scm:git:ssh://git@bitbucket.org:snipok/monpikas-client.git</developerConnection>
-      <url>https://bitbucket.org/snipok/monpikas-client.git</url>
-      <tag>HEAD</tag>
-   </scm>
-
-   <distributionManagement>
-      <repository>
-         <id>internal.repo</id>
-         <name>Temporary Staging Repository</name>
-         <url>file://${project.build.directory}/mvn-repo</url>
-      </repository>
-   </distributionManagement>
 
 </project>

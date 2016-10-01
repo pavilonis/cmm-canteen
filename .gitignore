@@ -2,7 +2,7 @@
 *.iml
 target
 out
-monpikas.log
+*.log
 
 pom.xml.releaseBackup
 release.properties

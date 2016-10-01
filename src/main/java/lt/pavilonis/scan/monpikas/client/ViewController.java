@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client;
+package lt.pavilonis.scan.monpikas.client;
 
 import com.google.common.collect.EvictingQueue;
 import javafx.animation.Animation;
@@ -6,10 +6,11 @@ import javafx.animation.Transition;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
-import lt.pavilonis.monpikas.client.dto.ClientPupilDto;
-import lt.pavilonis.monpikas.client.model.Card;
-import lt.pavilonis.monpikas.client.model.CardBig;
-import lt.pavilonis.monpikas.client.model.CardSmall;
+import lt.pavilonis.scan.monpikas.client.dto.ClientPupilDto;
+import lt.pavilonis.scan.monpikas.client.model.Card;
+import lt.pavilonis.scan.monpikas.client.model.CardBig;
+import lt.pavilonis.scan.monpikas.client.model.CardSmall;
+import lt.pavilonis.scan.service.ScannerReadEventObserver;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,8 +29,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.reverse;
 import static java.lang.Runtime.getRuntime;
 import static java.util.Arrays.asList;
-import static lt.pavilonis.monpikas.client.App.root;
-import static lt.pavilonis.monpikas.client.App.stage;
+import static lt.pavilonis.scan.monpikas.client.App.root;
+import static lt.pavilonis.scan.monpikas.client.App.stage;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.HttpStatus.ACCEPTED;
 import static org.springframework.http.HttpStatus.ALREADY_REPORTED;
@@ -38,7 +39,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @Controller
-public class ViewController {
+public class ViewController extends ScannerReadEventObserver {
 
    private static final Logger LOG = getLogger(ViewController.class.getSimpleName());
 
@@ -50,17 +51,18 @@ public class ViewController {
 
    @Autowired
    private CardBig first;
-   @Autowired
-   private CardSmall second;
-   @Autowired
-   private CardSmall third;
-   @Autowired
-   private CardSmall forth;
-   @Autowired
-   private CardSmall fifth;
 
    @Autowired
-   private BarcodeScannerInputHandler inputHandler;
+   private CardSmall second;
+
+   @Autowired
+   private CardSmall third;
+
+   @Autowired
+   private CardSmall forth;
+
+   @Autowired
+   private CardSmall fifth;
 
    @Autowired
    private UserRequestService userRequestService;
@@ -88,30 +90,30 @@ public class ViewController {
          }
       });
       root.getChildren().addAll(cards);
-      stage.addEventHandler(KeyEvent.KEY_TYPED, inputHandler);
 
       //test event handling
       stage.addEventHandler(KeyEvent.KEY_TYPED, (KeyEvent k) -> {
-         if (k.getCharacter().equals("a")) scanEventAction("5002");
-         if (k.getCharacter().equals("b")) scanEventAction("6769");
-         if (k.getCharacter().equals("c")) scanEventAction("5016");
-         if (k.getCharacter().equals("d")) scanEventAction("5027");
-         if (k.getCharacter().equals("e")) scanEventAction("5017");
+         if (k.getCharacter().equals("a")) consumeScannerInput("5002");
+         if (k.getCharacter().equals("b")) consumeScannerInput("6769");
+         if (k.getCharacter().equals("c")) consumeScannerInput("5016");
+         if (k.getCharacter().equals("d")) consumeScannerInput("5027");
+         if (k.getCharacter().equals("e")) consumeScannerInput("5017");
       });
    }
 
-   public void scanEventAction(String barcode) {
+   @Override
+   protected void consumeScannerInput(String cardCode) {
 
       if (transitionActive()) {
-         LOG.info("Transition is active, canceled request for bc: " + barcode);
+         LOG.info("Transition is active, canceled request for bc: " + cardCode);
          return;
       }
 
-      LOG.info("Requesting user with barcode: " + barcode);
+      LOG.info("Requesting user with cardCode: " + cardCode);
 
       ResponseEntity<ClientPupilDto> response = new ResponseEntity<>(OK);
       try {
-         response = userRequestService.requestUser(barcode);
+         response = userRequestService.requestUser(cardCode);
       } catch (ResourceAccessException e) {
          LOG.error("no connection to server: " + e);
          response = new ResponseEntity<>(SERVICE_UNAVAILABLE);

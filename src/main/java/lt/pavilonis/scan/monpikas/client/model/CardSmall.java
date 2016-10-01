@@ -1,4 +1,4 @@
-package lt.pavilonis.monpikas.client.model;
+package lt.pavilonis.scan.monpikas.client.model;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
