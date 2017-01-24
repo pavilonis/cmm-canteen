@@ -1,15 +1,14 @@
 package lt.pavilonis.scan.monpikas.client.model;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 import lt.pavilonis.scan.monpikas.client.enumeration.MealType;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Map;
 
-
-public class Meal implements Serializable {
+public final class Meal {
 
    private static final Map<MealType, String> translations = ImmutableMap.of(
          MealType.BREAKFAST, "Pusryčiai",
@@ -19,43 +18,19 @@ public class Meal implements Serializable {
          MealType.SUPPER, "Naktipiečiai"
    );
 
-   private Long id;
+   private final Long id;
+   private final String name;
+   private final MealType type;
+   private final double price;
 
-   private String name;
-
-   private MealType type;
-
-   private double price;
-
-   public Long getId() {
-      return id;
-   }
-
-   public void setId(Long id) {
+   public Meal(
+         @JsonProperty("id") Long id,
+         @JsonProperty("name") String name,
+         @JsonProperty("type") MealType type,
+         @JsonProperty("price") double price) {
       this.id = id;
-   }
-
-   public String getName() {
-      return name;
-   }
-
-   public void setName(String name) {
       this.name = name;
-   }
-
-   public MealType getType() {
-      return type;
-   }
-
-   public void setType(MealType type) {
       this.type = type;
-   }
-
-   public double getPrice() {
-      return price;
-   }
-
-   public void setPrice(double price) {
       this.price = price;
    }
 

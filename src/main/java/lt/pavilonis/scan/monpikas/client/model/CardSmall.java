@@ -15,7 +15,7 @@ import static java.lang.Thread.sleep;
 
 @Scope(value = "prototype")
 @Component
-public class CardSmall extends Card {
+public final class CardSmall extends Card {
 
    Card next;
 

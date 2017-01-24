@@ -4,25 +4,20 @@ import com.google.common.collect.EvictingQueue;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.concurrent.Task;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
-import lt.pavilonis.scan.monpikas.client.dto.ClientPupilDto;
+import lt.pavilonis.scan.monpikas.client.dto.User;
 import lt.pavilonis.scan.monpikas.client.model.Card;
 import lt.pavilonis.scan.monpikas.client.model.CardBig;
 import lt.pavilonis.scan.monpikas.client.model.CardSmall;
 import lt.pavilonis.scan.service.ScannerReadEventObserver;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 
 import javax.annotation.PostConstruct;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +27,6 @@ import static java.util.Arrays.asList;
 import static lt.pavilonis.scan.monpikas.client.App.root;
 import static lt.pavilonis.scan.monpikas.client.App.stage;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.springframework.http.HttpStatus.ACCEPTED;
-import static org.springframework.http.HttpStatus.ALREADY_REPORTED;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
@@ -42,12 +34,6 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 public class ViewController extends ScannerReadEventObserver {
 
    private static final Logger LOG = getLogger(ViewController.class.getSimpleName());
-
-   @Value("${Images.PhotoBasePath}")
-   private String PHOTO_BASE_PATH;
-
-   @Value("${Images.Extension}")
-   private String IMAGE_EXTENSION;
 
    @Autowired
    private CardBig first;
@@ -69,7 +55,7 @@ public class ViewController extends ScannerReadEventObserver {
 
    private double y = 20;
 
-   private EvictingQueue<ResponseEntity<ClientPupilDto>> responses = EvictingQueue.create(5);
+   private EvictingQueue<ResponseEntity<User>> responses = EvictingQueue.create(5);
 
    private List<Card> cards;
    private List<Transition> transitions = new ArrayList<>();
@@ -93,16 +79,15 @@ public class ViewController extends ScannerReadEventObserver {
 
       //test event handling
       stage.addEventHandler(KeyEvent.KEY_TYPED, (KeyEvent k) -> {
-         if (k.getCharacter().equals("a")) consumeScannerInput("5002");
+         if (k.getCharacter().equals("a")) consumeScannerInput("9E9476A6");
          if (k.getCharacter().equals("b")) consumeScannerInput("6769");
-         if (k.getCharacter().equals("c")) consumeScannerInput("5016");
-         if (k.getCharacter().equals("d")) consumeScannerInput("5027");
-         if (k.getCharacter().equals("e")) consumeScannerInput("5017");
       });
    }
 
    @Override
    protected void consumeScannerInput(String cardCode) {
+
+      cardCode = cardCode + "000000";
 
       if (transitionActive()) {
          LOG.info("Transition is active, canceled request for bc: " + cardCode);
@@ -111,7 +96,7 @@ public class ViewController extends ScannerReadEventObserver {
 
       LOG.info("Requesting user with cardCode: " + cardCode);
 
-      ResponseEntity<ClientPupilDto> response = new ResponseEntity<>(OK);
+      ResponseEntity<User> response = new ResponseEntity<>(OK);
       try {
          response = userRequestService.requestUser(cardCode);
       } catch (ResourceAccessException e) {
@@ -122,11 +107,10 @@ public class ViewController extends ScannerReadEventObserver {
       }
 
       responses.add(response);
-      setDtoImage(response);
 
       int i = 0;
       //update cards content
-      for (ResponseEntity<ClientPupilDto> r : reverse(new ArrayList<>(responses))) {
+      for (ResponseEntity<User> r : reverse(new ArrayList<>(responses))) {
          cards.get(i++).setResponse(r);
       }
       //start visual update sequence
@@ -134,11 +118,8 @@ public class ViewController extends ScannerReadEventObserver {
    }
 
    public boolean transitionActive() {
-      for (Transition t : transitions) {
-         if (t.getStatus().equals(Animation.Status.RUNNING))
-            return true;
-      }
-      return false;
+      return transitions.stream()
+            .anyMatch(t -> t.getStatus() == Animation.Status.RUNNING);
    }
 
    public void playSound(String soundCmd) {
@@ -151,29 +132,5 @@ public class ViewController extends ScannerReadEventObserver {
       });
       th.setDaemon(true);
       th.start();
-   }
-
-   private void setDtoImage(ResponseEntity<ClientPupilDto> response) {
-      HttpStatus code = response.getStatusCode();
-      boolean pupilExists = code == ACCEPTED || code == ALREADY_REPORTED || code == FORBIDDEN;
-      //String remoteImgUrl = "http://www.leenh.org/Pages/LeeNH_Building/pics/image003.jpg";       //for testing
-      if (pupilExists) {
-         String path = PHOTO_BASE_PATH + response.getBody().getId() + IMAGE_EXTENSION;
-         Image image = new Image(path, 0, 0, true, false, true);
-         response.getBody().setImage(image);
-      }
-   }
-
-   private boolean checkRemoteImage(String url) {
-      try {
-         URL u = new URL(url);
-         HttpURLConnection http = (HttpURLConnection) u.openConnection();
-         http.setInstanceFollowRedirects(false);
-         http.setRequestMethod("HEAD");
-         http.connect();
-         return (http.getResponseCode() == HttpURLConnection.HTTP_OK);
-      } catch (Exception e) {
-         return false;
-      }
    }
 }

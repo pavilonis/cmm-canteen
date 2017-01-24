@@ -1,6 +1,6 @@
 package lt.pavilonis.scan.monpikas.client;
 
-import lt.pavilonis.scan.monpikas.client.dto.ClientPupilDto;
+import lt.pavilonis.scan.monpikas.client.dto.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -40,7 +40,7 @@ public class UserRequestService {
       rt.setErrorHandler(new CustomResponseErrorHandler());
    }
 
-   public ResponseEntity<ClientPupilDto> requestUser(String barcode) {
+   public ResponseEntity<User> requestUser(String barcode) {
 
       String creds = username + ":" + password;
       byte[] base64credsBytes = Base64.getEncoder().encode(creds.getBytes());
@@ -52,7 +52,7 @@ public class UserRequestService {
       String url = pupilRequestUrl + barcode;
       HttpEntity<String> request = new HttpEntity<>(headers);
       rt.setMessageConverters(getMessageConverters());
-      return rt.exchange(url, HttpMethod.GET, request, ClientPupilDto.class);
+      return rt.exchange(url, HttpMethod.GET, request, User.class);
    }
 
    private List<HttpMessageConverter<?>> getMessageConverters() {

@@ -1,10 +1,12 @@
 package lt.pavilonis.scan.monpikas.client.model;
 
+import com.google.common.io.BaseEncoding;
 import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -17,12 +19,17 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
-import lt.pavilonis.scan.monpikas.client.dto.ClientPupilDto;
+import lt.pavilonis.scan.monpikas.client.dto.User;
 import lt.pavilonis.scan.monpikas.client.enumeration.PupilType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +42,7 @@ public abstract class Card extends Group {
 
    private static final Logger LOG = getLogger(Card.class.getSimpleName());
 
-   protected ResponseEntity<ClientPupilDto> response;
+   protected ResponseEntity<User> response;
 
    @Value("${Card.Icon.NoPhotoContent}")
    protected String ICON_NO_PHOTO_CONTENT_PATH;
@@ -72,7 +79,6 @@ public abstract class Card extends Group {
       outerRect.setArcHeight(20);
       outerRect.setArcWidth(20);
       outerRect.setStroke(Color.BLACK);
-      //outerRect.setEffect(new DropShadow(10, 5, 5, Color.DARKGRAY));
 
       innerRect.setArcHeight(20);
       innerRect.setArcWidth(20);
@@ -85,7 +91,7 @@ public abstract class Card extends Group {
    }
 
    protected void update() {
-      ClientPupilDto dto = response.getBody();
+      User dto = response.getBody();
 
       switch (response.getStatusCode()) {
 
@@ -129,7 +135,9 @@ public abstract class Card extends Group {
    }
 
    private void log(String text) {
-      if (this instanceof CardBig) LOG.info(text);
+      if (this instanceof CardBig) {
+         LOG.info(text);
+      }
    }
 
    protected void decorate(String name, Color color, Object desc) {
@@ -144,10 +152,11 @@ public abstract class Card extends Group {
             Platform.runLater(() -> {
                ObservableList<Node> container = PHOTO_CONTAINER.getChildren();
                container.clear();
-               if (image() == null || image().getProgress() == 1.0 && (image().getWidth() == 0.0 || image().getHeight() == 0.0)) {
+               Image image = getImage();
+               if (image == null) {
                   container.add(ICON_NO_PHOTO);
                } else {
-                  imageView.setImage(image());
+                  imageView.setImage(image);
                   container.add(imageView);
                   imageView.setY(50);
                }
@@ -159,7 +168,7 @@ public abstract class Card extends Group {
       th.start();
    }
 
-   public void setResponse(ResponseEntity<ClientPupilDto> response) {
+   public void setResponse(ResponseEntity<User> response) {
       this.response = response;
    }
 
@@ -169,9 +178,26 @@ public abstract class Card extends Group {
       }
    }
 
-   private Image image() {
-      return response.getBody() != null
-            ? response.getBody().getImage()
+   private Image getImage() {
+
+      String base16image = response.getBody().getBase16photo();
+
+      return StringUtils.isNotBlank(base16image) && BaseEncoding.base16().canDecode(base16image)
+            ? extractImageFromString(base16image)
             : null;
+   }
+
+   private Image extractImageFromString(String base16image) {
+      byte[] imageBytes = BaseEncoding.base16().decode(base16image);
+
+      try (ByteArrayInputStream input = new ByteArrayInputStream(imageBytes)) {
+
+         BufferedImage image = ImageIO.read(input);
+         return SwingFXUtils.toFXImage(image, null);
+
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return null;
    }
 }

@@ -7,7 +7,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-public class App extends Application {
+public final class App extends Application {
 
    static Group root = new Group();
    static Stage stage;

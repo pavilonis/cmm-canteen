@@ -51,7 +51,7 @@ public class CardBig extends Card {
    private String ICON_STATUS_REJECT_CONTENT;
 
    @Autowired
-   ViewController controller;
+   private ViewController controller;
 
    private final Text DESCRIPTION = new Text();
    private final SVGPath ICON_STATUS_OK = new SVGPath();
@@ -189,7 +189,7 @@ public class CardBig extends Card {
       Thread th = new Thread(new Task<Void>() {
          @Override
          protected Void call() throws Exception {
-            Platform.runLater(() -> setPhoto());
+            Platform.runLater(CardBig.this::setPhoto);
             sleep((long) ANIMATION_DURATION.toMillis());
             Platform.runLater(() -> {
                fade.setFromValue(0);

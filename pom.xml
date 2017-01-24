@@ -24,9 +24,9 @@
 
       <!-- UTILS -->
       <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-         <version>19.0</version>
+         <groupId>lt.pavilonis</groupId>
+         <artifactId>utils</artifactId>
+         <version>0.1-SNAPSHOT</version>
       </dependency>
 
       <!-- SERIALIZATION -->
