@@ -1,8 +1,6 @@
 package lt.pavilonis.scan.monpikas.client;
 
 import com.google.common.collect.EvictingQueue;
-import javafx.animation.Animation;
-import javafx.animation.Transition;
 import javafx.concurrent.Task;
 import javafx.scene.input.KeyEvent;
 import lt.pavilonis.scan.monpikas.client.dto.User;
@@ -58,7 +56,6 @@ public class ViewController extends ScannerReadEventObserver {
    private EvictingQueue<ResponseEntity<User>> responses = EvictingQueue.create(5);
 
    private List<Card> cards;
-   private List<Transition> transitions = new ArrayList<>();
 
    @PostConstruct
    public void initialize() {
@@ -67,11 +64,10 @@ public class ViewController extends ScannerReadEventObserver {
       third.setNext(second);
       second.setNext(first);
       cards = asList(first, second, third, forth, fifth);
-      cards.forEach(c -> {
-         c.initialize();
-         transitions.addAll(c.getTransitions());
-         if (cards.indexOf(c) != 0) {
-            c.setLayoutY(y);
+      cards.forEach(card -> {
+         card.initialize();
+         if (cards.indexOf(card) != 0) {
+            card.setLayoutY(y);
             y += 220;
          }
       });
@@ -79,7 +75,7 @@ public class ViewController extends ScannerReadEventObserver {
 
       //test event handling
       stage.addEventHandler(KeyEvent.KEY_TYPED, (KeyEvent k) -> {
-         if (k.getCharacter().equals("a")) consumeScannerInput("9E9476A6");
+         if (k.getCharacter().equals("a")) consumeScannerInput("DE0C776C");
          if (k.getCharacter().equals("b")) consumeScannerInput("6769");
       });
    }
@@ -88,11 +84,6 @@ public class ViewController extends ScannerReadEventObserver {
    protected void consumeScannerInput(String cardCode) {
 
       cardCode = cardCode + "000000";
-
-      if (transitionActive()) {
-         LOG.info("Transition is active, canceled request for bc: " + cardCode);
-         return;
-      }
 
       LOG.info("Requesting user with cardCode: " + cardCode);
 
@@ -115,11 +106,6 @@ public class ViewController extends ScannerReadEventObserver {
       }
       //start visual update sequence
       fifth.update();
-   }
-
-   public boolean transitionActive() {
-      return transitions.stream()
-            .anyMatch(t -> t.getStatus() == Animation.Status.RUNNING);
    }
 
    public void playSound(String soundCmd) {

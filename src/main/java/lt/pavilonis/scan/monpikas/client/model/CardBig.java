@@ -2,7 +2,6 @@ package lt.pavilonis.scan.monpikas.client.model;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
-import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -25,10 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 import static java.lang.Thread.sleep;
-import static java.util.Arrays.asList;
 import static javafx.animation.Interpolator.EASE_IN;
 import static javafx.geometry.VPos.CENTER;
 
@@ -178,11 +174,6 @@ public class CardBig extends Card {
       container.add(DESCRIPTION);
 
       gradeText.setText(response.getBody() != null ? response.getBody().getGrade() : "");
-   }
-
-   @Override
-   public List<Transition> getTransitions() {
-      return asList(scale, fade, translate);
    }
 
    protected void sleepAndRun() {

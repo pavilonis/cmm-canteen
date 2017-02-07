@@ -1,7 +1,6 @@
 package lt.pavilonis.scan.monpikas.client.model;
 
 import com.google.common.io.BaseEncoding;
-import javafx.animation.Transition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -30,8 +29,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 import static javafx.scene.paint.Color.BLUE;
 import static javafx.scene.paint.Color.GREEN;
@@ -84,10 +81,6 @@ public abstract class Card extends Group {
       innerRect.setArcWidth(20);
       innerRect.setFill(Color.WHITE);
       innerRect.setStroke(Color.BLACK);
-   }
-
-   public List<Transition> getTransitions() {
-      return Collections.singletonList(translate);
    }
 
    protected void update() {
@@ -179,6 +172,13 @@ public abstract class Card extends Group {
    }
 
    private Image getImage() {
+
+      if (true)
+         return null;
+
+      if (response == null || response.getBody() == null) {
+         return null;
+      }
 
       String base16image = response.getBody().getBase16photo();
 
