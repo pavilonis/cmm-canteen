@@ -3,7 +3,6 @@ package lt.pavilonis.scan.monpikas.client.model;
 import com.google.common.io.BaseEncoding;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -47,6 +46,9 @@ public abstract class Card extends Group {
 
    @Value("${card.message.alreadyHadDinner}")
    private String alreadyHadMealMessage;
+
+   @Value("${card.displayPhotos}")
+   private boolean displayPhotos;
 
    protected final FlowPane photoContainer = new FlowPane();
    protected final SVGPath iconNoPhoto = new SVGPath();
@@ -131,26 +133,18 @@ public abstract class Card extends Group {
    }
 
    protected void setPhoto() {
-      Thread th = new Thread(new Task<Void>() {
-         @Override
-         protected Void call() throws Exception {
-            Platform.runLater(() -> {
-               ObservableList<Node> container = photoContainer.getChildren();
-               container.clear();
-               Image image = getImage();
-               if (image == null) {
-                  container.add(iconNoPhoto);
-               } else {
-                  imageView.setImage(image);
-                  container.add(imageView);
-                  imageView.setY(50);
-               }
-            });
-            return null;
+      Platform.runLater(() -> {
+         ObservableList<Node> container = photoContainer.getChildren();
+         container.clear();
+         Image image = getImage();
+         if (image == null) {
+            container.add(iconNoPhoto);
+         } else {
+            imageView.setImage(image);
+            container.add(imageView);
+            imageView.setY(50);
          }
       });
-      th.setDaemon(true);
-      th.start();
    }
 
    public void setResponse(ResponseEntity<User> response) {
@@ -165,10 +159,7 @@ public abstract class Card extends Group {
 
    private Image getImage() {
 
-      if (true)
-         return null;
-
-      if (response == null || response.getBody() == null) {
+      if (!displayPhotos || response == null || response.getBody() == null) {
          return null;
       }
 
