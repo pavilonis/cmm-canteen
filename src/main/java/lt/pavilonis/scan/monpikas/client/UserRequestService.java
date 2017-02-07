@@ -14,7 +14,7 @@ import java.net.URI;
 @Service
 public class UserRequestService {
 
-   @Value("${Rest.pupilRequestUrl}")
+   @Value("${rest.pupilRequestUrl}")
    private String pupilRequestUrl;
 
    @Autowired

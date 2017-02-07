@@ -31,19 +31,19 @@ public final class CardBig extends Card {
 
    private static final Logger LOG = getLogger(CardBig.class.getSimpleName());
 
-   @Value("${Audio.Success}")
+   @Value("${audio.success}")
    private String playSuccessSoundCmd;
 
-   @Value("${Audio.SystemError}")
+   @Value("${audio.systemError}")
    private String playSysErrorSoundCmd;
 
-   @Value("${Audio.Error}")
+   @Value("${audio.error}")
    private String playErrorSoundCmd;
 
-   @Value("${Card.Icon.StatusOkContent}")
+   @Value("${card.icon.statusOkContent}")
    private String iconStatusOkContent;
 
-   @Value("${Card.Icon.StatusRejectedContent}")
+   @Value("${card.icon.statusRejectedContent}")
    private String iconStatusRejectContent;
 
    private final Text descriptionText = new Text();

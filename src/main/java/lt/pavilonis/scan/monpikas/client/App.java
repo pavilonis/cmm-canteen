@@ -41,10 +41,10 @@ public class App extends Application {
       stage.show();
    }
 
-   @Value("${Rest.Auth.Username}")
+   @Value("${rest.auth.username}")
    private String username;
 
-   @Value("${Rest.Auth.Password}")
+   @Value("${rest.auth.password}")
    private String password;
 
    @Bean

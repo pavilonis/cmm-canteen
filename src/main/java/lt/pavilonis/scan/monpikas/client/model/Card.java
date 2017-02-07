@@ -39,13 +39,13 @@ public abstract class Card extends Group {
 
    protected ResponseEntity<User> response;
 
-   @Value("${Card.Icon.NoPhotoContent}")
+   @Value("${card.icon.noPhotoContent}")
    protected String iconNoPhotoContentPath;
 
-   @Value("${Card.Message.NoPermission}")
+   @Value("${card.message.noPermission}")
    private String noPermissionMessage;
 
-   @Value("${Card.Message.AlreadyHadDinner}")
+   @Value("${card.message.alreadyHadDinner}")
    private String alreadyHadMealMessage;
 
    protected final FlowPane photoContainer = new FlowPane();
