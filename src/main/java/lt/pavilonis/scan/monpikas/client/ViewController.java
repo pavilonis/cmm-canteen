@@ -1,7 +1,6 @@
 package lt.pavilonis.scan.monpikas.client;
 
 import com.google.common.collect.EvictingQueue;
-import javafx.concurrent.Task;
 import javafx.scene.input.KeyEvent;
 import lt.pavilonis.scan.monpikas.client.dto.User;
 import lt.pavilonis.scan.monpikas.client.model.Card;
@@ -10,6 +9,7 @@ import lt.pavilonis.scan.monpikas.client.model.CardSmall;
 import lt.pavilonis.scan.service.ScannerReadEventObserver;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -17,16 +17,13 @@ import org.springframework.web.client.ResourceAccessException;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.reverse;
-import static java.lang.Runtime.getRuntime;
-import static java.util.Arrays.asList;
 import static lt.pavilonis.scan.monpikas.client.App.root;
 import static lt.pavilonis.scan.monpikas.client.App.stage;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @Controller
 public class ViewController extends ScannerReadEventObserver {
@@ -63,7 +60,7 @@ public class ViewController extends ScannerReadEventObserver {
       forth.setNext(third);
       third.setNext(second);
       second.setNext(first);
-      cards = asList(first, second, third, forth, fifth);
+      cards = Arrays.asList(first, second, third, forth, fifth);
       cards.forEach(card -> {
          card.initialize();
          if (cards.indexOf(card) != 0) {
@@ -84,39 +81,27 @@ public class ViewController extends ScannerReadEventObserver {
    protected void consumeScannerInput(String cardCode) {
 
       cardCode = cardCode + "000000";
-
       LOG.info("Requesting user with cardCode: " + cardCode);
 
-      ResponseEntity<User> response = new ResponseEntity<>(OK);
       try {
-         response = userRequestService.requestUser(cardCode);
+         responses.add(
+               userRequestService.requestUser(cardCode)
+         );
       } catch (ResourceAccessException e) {
          LOG.error("no connection to server: " + e);
-         response = new ResponseEntity<>(SERVICE_UNAVAILABLE);
+         responses.add(
+               new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE)
+         );
       } catch (HttpStatusCodeException e) {
          LOG.error("Unknown error: " + e);
       }
 
-      responses.add(response);
-
       int i = 0;
       //update cards content
-      for (ResponseEntity<User> r : reverse(new ArrayList<>(responses))) {
-         cards.get(i++).setResponse(r);
+      for (ResponseEntity<User> response : reverse(new ArrayList<>(responses))) {
+         cards.get(i++).setResponse(response);
       }
       //start visual update sequence
       fifth.update();
-   }
-
-   public void playSound(String soundCmd) {
-      Thread th = new Thread(new Task<Void>() {
-         @Override
-         protected Void call() throws Exception {
-            getRuntime().exec(soundCmd);
-            return null;
-         }
-      });
-      th.setDaemon(true);
-      th.start();
    }
 }

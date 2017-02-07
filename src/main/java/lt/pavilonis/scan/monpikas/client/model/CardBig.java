@@ -1,10 +1,7 @@
 package lt.pavilonis.scan.monpikas.client.model;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,43 +15,41 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import lt.pavilonis.scan.monpikas.client.ViewController;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import static java.lang.Thread.sleep;
-import static javafx.animation.Interpolator.EASE_IN;
+import java.io.IOException;
+
+import static java.lang.Runtime.getRuntime;
 import static javafx.geometry.VPos.CENTER;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
-public class CardBig extends Card {
+public final class CardBig extends Card {
+
+   private static final Logger LOG = getLogger(CardBig.class.getSimpleName());
 
    @Value("${Audio.Success}")
-   private String PLAY_SUCCESS_SOUND_CMD;
+   private String playSuccessSoundCmd;
 
    @Value("${Audio.SystemError}")
-   private String PLAY_SYS_ERROR_SOUND_CMD;
+   private String playSysErrorSoundCmd;
 
    @Value("${Audio.Error}")
-   private String PLAY_ERROR_SOUND_CMD;
+   private String playErrorSoundCmd;
 
    @Value("${Card.Icon.StatusOkContent}")
-   private String ICON_STATUS_OK_CONTENT;
+   private String iconStatusOkContent;
 
    @Value("${Card.Icon.StatusRejectedContent}")
-   private String ICON_STATUS_REJECT_CONTENT;
+   private String iconStatusRejectContent;
 
-   @Autowired
-   private ViewController controller;
-
-   private final Text DESCRIPTION = new Text();
-   private final SVGPath ICON_STATUS_OK = new SVGPath();
-   private final SVGPath ICON_STATUS_REJECT = new SVGPath();
-   private final FlowPane STATUS_MSG_FLOW_PANE = new FlowPane();
-   private final ScaleTransition scale = new ScaleTransition(ANIMATION_DURATION.multiply(5), this);
-   private final FadeTransition fade = new FadeTransition(ANIMATION_DURATION.multiply(5), this);
+   private final Text descriptionText = new Text();
+   private final SVGPath iconStatusOk = new SVGPath();
+   private final SVGPath iconStatusReject = new SVGPath();
+   private final FlowPane statusMessagePane = new FlowPane();
    private final Rectangle gradeRect = new Rectangle();
 
    @Override
@@ -64,27 +59,25 @@ public class CardBig extends Card {
       setLayoutX(20);
       setLayoutY(20);
 
-      translate.setDuration(ANIMATION_DURATION.multiply(5));
+      iconNoPhoto.setScaleX(19);
+      iconNoPhoto.setScaleY(19);
+      iconNoPhoto.setStrokeWidth(0.2);
 
-      ICON_NO_PHOTO.setScaleX(19);
-      ICON_NO_PHOTO.setScaleY(19);
-      ICON_NO_PHOTO.setStrokeWidth(0.2);
+      iconStatusOk.setContent(iconStatusOkContent);
+      iconStatusOk.setScaleX(5);
+      iconStatusOk.setScaleY(5);
+      iconStatusOk.setFill(Color.GREEN);
+      iconStatusOk.setStroke(Color.DARKGREY);
+      iconStatusOk.setStrokeWidth(0.2);
 
-      ICON_STATUS_OK.setContent(ICON_STATUS_OK_CONTENT);
-      ICON_STATUS_OK.setScaleX(5);
-      ICON_STATUS_OK.setScaleY(5);
-      ICON_STATUS_OK.setFill(Color.GREEN);
-      ICON_STATUS_OK.setStroke(Color.DARKGREY);
-      ICON_STATUS_OK.setStrokeWidth(0.2);
+      iconStatusReject.setContent(iconStatusRejectContent);
+      iconStatusReject.setScaleX(6);
+      iconStatusReject.setScaleY(6);
+      iconStatusReject.setFill(Color.RED);
+      iconStatusReject.setStroke(Color.DARKGREY);
+      iconStatusReject.setStrokeWidth(0.2);
 
-      ICON_STATUS_REJECT.setContent(ICON_STATUS_REJECT_CONTENT);
-      ICON_STATUS_REJECT.setScaleX(6);
-      ICON_STATUS_REJECT.setScaleY(6);
-      ICON_STATUS_REJECT.setFill(Color.RED);
-      ICON_STATUS_REJECT.setStroke(Color.DARKGREY);
-      ICON_STATUS_REJECT.setStrokeWidth(0.2);
-
-      DESCRIPTION.setFont(Font.font("SansSerif", 50));
+      descriptionText.setFont(Font.font("SansSerif", 50));
 
       ColumnConstraints columnConstraint = new ColumnConstraints(540);
       columnConstraint.setHalignment(HPos.CENTER);
@@ -98,7 +91,7 @@ public class CardBig extends Card {
       rcBottom.setValignment(CENTER);
 
       grid.getRowConstraints().addAll(rcTop, rcMiddle, rcBottom);
-      grid.add(PHOTO_CONTAINER, 0, 0);
+      grid.add(photoContainer, 0, 0);
 
       nameText.setWrappingWidth(540);
       nameText.setFont(Font.font("SansSerif", 70));
@@ -126,9 +119,9 @@ public class CardBig extends Card {
       gradeText.setY(440);
       gradeText.setX(400);
 
-      STATUS_MSG_FLOW_PANE.setAlignment(Pos.CENTER);
-      STATUS_MSG_FLOW_PANE.setHgap(60);
-      grid.add(STATUS_MSG_FLOW_PANE, 0, 2);
+      statusMessagePane.setAlignment(Pos.CENTER);
+      statusMessagePane.setHgap(60);
+      grid.add(statusMessagePane, 0, 2);
       grid.setPadding(new Insets(20));
 
       getChildren().add(outerRect);
@@ -136,62 +129,51 @@ public class CardBig extends Card {
       getChildren().add(grid);
       getChildren().add(gradeRect);
       getChildren().add(gradeText);
-
-      fade.setInterpolator(EASE_IN);
    }
 
    @Override
    public void update() {
-      double originX = getTranslateX();
-      double originY = getTranslateY();
-      translate.setToX(605);
-      translate.setToY(-655);
-      translate.setOnFinished(event -> {
-         setVisible(false);
-         super.update();
-         setTranslateX(originX);
-         setTranslateY(originY);
-         sleepAndRun();
+      super.update();
+      Platform.runLater(() -> {
+         setPhoto();
+         if (!isVisible()) {
+            setVisible(true);
+         }
       });
-      translate.play();
+   }
+
+   @Override
+   protected void log(String text) {
+      LOG.info(text);
    }
 
    @Override
    protected void decorate(String title, Color color, Object desc) {
       super.decorate(title, color, desc);
 
-      ObservableList<Node> container = STATUS_MSG_FLOW_PANE.getChildren();
+      ObservableList<Node> container = statusMessagePane.getChildren();
       container.clear();
 
       if (response.getStatusCode() == HttpStatus.ACCEPTED) {
-         container.add(ICON_STATUS_OK);
-         controller.playSound(PLAY_SUCCESS_SOUND_CMD);
+         container.add(iconStatusOk);
+         playSound(playSuccessSoundCmd);
       } else {
-         container.add(ICON_STATUS_REJECT);
-         controller.playSound(PLAY_ERROR_SOUND_CMD);
+         container.add(iconStatusReject);
+         playSound(playErrorSoundCmd);
       }
-      DESCRIPTION.setText(desc.toString());
-      container.add(DESCRIPTION);
+      descriptionText.setText(desc.toString());
+      container.add(descriptionText);
 
       gradeText.setText(response.getBody() != null ? response.getBody().getGrade() : "");
    }
 
-   protected void sleepAndRun() {
-      Thread th = new Thread(new Task<Void>() {
-         @Override
-         protected Void call() throws Exception {
-            Platform.runLater(CardBig.this::setPhoto);
-            sleep((long) ANIMATION_DURATION.toMillis());
-            Platform.runLater(() -> {
-               fade.setFromValue(0);
-               fade.setToValue(1);
-               fade.play();
-               setVisible(true);
-            });
-            return null;
+   private void playSound(String soundCmd) {
+      Platform.runLater(() -> {
+         try {
+            getRuntime().exec(soundCmd);
+         } catch (IOException e) {
+            LOG.error("Could not play sound: " + e);
          }
       });
-      th.setDaemon(true);
-      th.start();
    }
 }

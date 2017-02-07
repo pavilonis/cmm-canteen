@@ -1,7 +1,6 @@
 package lt.pavilonis.scan.monpikas.client.model;
 
 import com.google.common.io.BaseEncoding;
-import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -17,7 +16,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
-import javafx.util.Duration;
 import lt.pavilonis.scan.monpikas.client.dto.User;
 import lt.pavilonis.scan.monpikas.client.enumeration.PupilType;
 import org.apache.commons.lang3.StringUtils;
@@ -42,36 +40,34 @@ public abstract class Card extends Group {
    protected ResponseEntity<User> response;
 
    @Value("${Card.Icon.NoPhotoContent}")
-   protected String ICON_NO_PHOTO_CONTENT_PATH;
+   protected String iconNoPhotoContentPath;
 
    @Value("${Card.Message.NoPermission}")
-   private String NO_PERMISSION_MSG;
+   private String noPermissionMessage;
 
    @Value("${Card.Message.AlreadyHadDinner}")
-   private String ALREADY_HAD_MEAL_MSG;
+   private String alreadyHadMealMessage;
 
-   protected final FlowPane PHOTO_CONTAINER = new FlowPane();
-   protected final SVGPath ICON_NO_PHOTO = new SVGPath();
+   protected final FlowPane photoContainer = new FlowPane();
+   protected final SVGPath iconNoPhoto = new SVGPath();
    protected final Rectangle outerRect = new Rectangle();
    protected final Rectangle innerRect = new Rectangle();
    protected final Text nameText = new Text();
    protected final Text gradeText = new Text();
    protected final GridPane grid = new GridPane();
-   protected final Duration ANIMATION_DURATION = Duration.seconds(.2);
-   protected ImageView imageView = new ImageView();
-   TranslateTransition translate = new TranslateTransition(ANIMATION_DURATION, this);
+   protected final ImageView imageView = new ImageView();
 
    public void initialize() {
       setVisible(false);
-      PHOTO_CONTAINER.setAlignment(Pos.CENTER);
+      photoContainer.setAlignment(Pos.CENTER);
 
-      ICON_NO_PHOTO.setContent(ICON_NO_PHOTO_CONTENT_PATH);
-      ICON_NO_PHOTO.setStroke(Color.DARKGREY);
-      ICON_NO_PHOTO.setFill(Color.LIGHTGRAY);
+      iconNoPhoto.setContent(iconNoPhotoContentPath);
+      iconNoPhoto.setStroke(Color.DARKGREY);
+      iconNoPhoto.setFill(Color.LIGHTGRAY);
 
       imageView.setPreserveRatio(true);
-      imageView.fitWidthProperty().bind(PHOTO_CONTAINER.widthProperty().asObject());
-      imageView.fitHeightProperty().bind(PHOTO_CONTAINER.heightProperty());
+      imageView.fitWidthProperty().bind(photoContainer.widthProperty().asObject());
+      imageView.fitHeightProperty().bind(photoContainer.heightProperty());
 
       outerRect.setArcHeight(20);
       outerRect.setArcWidth(20);
@@ -94,12 +90,12 @@ public abstract class Card extends Group {
             break;
 
          case ALREADY_REPORTED:
-            decorate(dto.getName(), RED, ALREADY_HAD_MEAL_MSG);
+            decorate(dto.getName(), RED, alreadyHadMealMessage);
             log("Pupil " + dto.getName() + " already had hist meal");
             break;
 
          case FORBIDDEN:
-            decorate(dto.getName(), RED, NO_PERMISSION_MSG);
+            decorate(dto.getName(), RED, noPermissionMessage);
             log("Pupil " + dto.getName() + " has no permission");
             break;
 
@@ -127,11 +123,7 @@ public abstract class Card extends Group {
       }
    }
 
-   private void log(String text) {
-      if (this instanceof CardBig) {
-         LOG.info(text);
-      }
-   }
+   protected void log(String text) {/*should be overridden by big card*/}
 
    protected void decorate(String name, Color color, Object desc) {
       nameText.setText(name);
@@ -143,11 +135,11 @@ public abstract class Card extends Group {
          @Override
          protected Void call() throws Exception {
             Platform.runLater(() -> {
-               ObservableList<Node> container = PHOTO_CONTAINER.getChildren();
+               ObservableList<Node> container = photoContainer.getChildren();
                container.clear();
                Image image = getImage();
                if (image == null) {
-                  container.add(ICON_NO_PHOTO);
+                  container.add(iconNoPhoto);
                } else {
                   imageView.setImage(image);
                   container.add(imageView);

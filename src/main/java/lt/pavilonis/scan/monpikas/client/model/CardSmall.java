@@ -1,7 +1,6 @@
 package lt.pavilonis.scan.monpikas.client.model;
 
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -10,8 +9,6 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import static java.lang.Thread.sleep;
 
 @Scope(value = "prototype")
 @Component
@@ -36,10 +33,10 @@ public final class CardSmall extends Card {
       rc.setValignment(VPos.CENTER);
       grid.getRowConstraints().add(rc);
 
-      ICON_NO_PHOTO.setScaleX(5);
-      ICON_NO_PHOTO.setScaleY(5);
-      ICON_NO_PHOTO.setStrokeWidth(0.5);
-      grid.add(PHOTO_CONTAINER, 0, 0);
+      iconNoPhoto.setScaleX(5);
+      iconNoPhoto.setScaleY(5);
+      iconNoPhoto.setStrokeWidth(0.5);
+      grid.add(photoContainer, 0, 0);
 
       nameText.setWrappingWidth(640);
       nameText.setFont(Font.font("SansSerif", 60));
@@ -61,43 +58,16 @@ public final class CardSmall extends Card {
    @Override
    public void update() {
       if (response != null) {
-         double originY = getTranslateY();
-         translate.setToY(220);
-         translate.setOnFinished(event -> {
-            sleepAndRun(originY);
-            next.update();
+         Platform.runLater(() -> {
+            super.update();
+            setPhoto();
+            ensureVisible();
          });
-         translate.play();
-      } else {
-         next.update();
       }
-   }
-
-   private void superupdate() {
-      super.update();
+      next.update();
    }
 
    public void setNext(Card next) {
       this.next = next;
-   }
-
-   protected void sleepAndRun(double originY) {
-      Thread th = new Thread(new Task<Void>() {
-         @Override
-         protected Void call() throws Exception {
-            sleep((long) ANIMATION_DURATION.toMillis() * 5);
-            Platform.runLater(() -> {
-               setTranslateY(originY);
-               if (response != null) {
-                  superupdate();
-                  setPhoto();
-                  ensureVisible();
-               }
-            });
-            return null;
-         }
-      });
-      th.setDaemon(true);
-      th.start();
    }
 }
