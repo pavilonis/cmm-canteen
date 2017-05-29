@@ -1,6 +1,6 @@
 package lt.pavilonis.scan.monpikas.client.enumeration;
 
-public enum MealType {
+public enum EatingType {
    BREAKFAST,
    LUNCH,
    DINNER,

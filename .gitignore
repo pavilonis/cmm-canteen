@@ -4,5 +4,6 @@ target
 out
 *.log
 
+app.properties
 pom.xml.releaseBackup
 release.properties

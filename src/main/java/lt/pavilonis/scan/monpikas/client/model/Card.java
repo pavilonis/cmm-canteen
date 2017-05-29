@@ -87,7 +87,7 @@ public abstract class Card extends Group {
       switch (response.getStatusCode()) {
 
          case ACCEPTED:
-            decorate(dto.getName(), dto.getType() == PupilType.SOCIAL ? GREEN : BLUE, dto.getMeal());
+            decorate(dto.getName(), dto.getType() == PupilType.SOCIAL ? GREEN : BLUE, dto.getEating());
             log("Pupil " + dto.getName() + " is getting his meal");
             break;
 

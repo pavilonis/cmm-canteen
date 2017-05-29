@@ -23,7 +23,7 @@ import java.util.Collections;
 
 @Configuration
 @ComponentScan({"lt.pavilonis.scan", "resources"})
-@PropertySource({"inner.properties", "file:/opt/monpikas/monpikas.properties"})
+@PropertySource(value = {"inner.properties", "file:${propertiesLocation:app.properties}"}, encoding = "UTF-8")
 public class App extends Application {
 
    static final Group root = new Group();

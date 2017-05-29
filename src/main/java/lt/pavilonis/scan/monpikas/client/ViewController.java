@@ -72,8 +72,8 @@ public class ViewController extends ScannerReadEventObserver {
 
       //test event handling
       stage.addEventHandler(KeyEvent.KEY_TYPED, (KeyEvent k) -> {
-         if (k.getCharacter().equals("a")) consumeScannerInput("DE0C776C");
-         if (k.getCharacter().equals("b")) consumeScannerInput("6769");
+         if (k.getCharacter().equals("a")) consumeScannerInput("6EB4A9A6");
+         if (k.getCharacter().equals("b")) consumeScannerInput("36944CD0");
       });
    }
 

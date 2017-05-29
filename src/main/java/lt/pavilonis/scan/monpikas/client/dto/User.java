@@ -2,13 +2,13 @@ package lt.pavilonis.scan.monpikas.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lt.pavilonis.scan.monpikas.client.enumeration.PupilType;
-import lt.pavilonis.scan.monpikas.client.model.Meal;
+import lt.pavilonis.scan.monpikas.client.model.Eating;
 
 public final class User {
 
    private final String cardCode;
    private final String name;
-   private final Meal meal;
+   private final Eating eating;
    private final String grade;
    private final PupilType type;
    private final String base16photo;
@@ -16,14 +16,14 @@ public final class User {
    public User(
          @JsonProperty("cardCode") String cardCode,
          @JsonProperty("name") String name,
-         @JsonProperty("meal") Meal meal,
+         @JsonProperty("eating") Eating eating,
          @JsonProperty("grade") String grade,
          @JsonProperty("type") PupilType type,
          @JsonProperty("base16photo") String base16photo) {
 
       this.cardCode = cardCode;
       this.name = name;
-      this.meal = meal;
+      this.eating = eating;
       this.grade = grade;
       this.type = type;
       this.base16photo = base16photo;
@@ -37,8 +37,8 @@ public final class User {
       return name;
    }
 
-   public Meal getMeal() {
-      return meal;
+   public Eating getEating() {
+      return eating;
    }
 
    public String getGrade() {
