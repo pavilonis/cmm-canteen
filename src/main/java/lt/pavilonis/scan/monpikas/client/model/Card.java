@@ -3,7 +3,6 @@ package lt.pavilonis.scan.monpikas.client.model;
 import com.google.common.io.BaseEncoding;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,8 +21,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -107,10 +104,12 @@ public abstract class Card extends Group {
             break;
 
          case SERVICE_UNAVAILABLE:
+            log("Server not found");
             decorate("Serveris nerastas", RED, "");
             break;
 
          case MULTIPLE_CHOICES:
+            log("Eating time mismatch");
             decorate("Netinkamas laikas", RED, "");
             break;
 
@@ -175,12 +174,11 @@ public abstract class Card extends Group {
 
       try (ByteArrayInputStream input = new ByteArrayInputStream(imageBytes)) {
 
-         BufferedImage image = ImageIO.read(input);
-         return SwingFXUtils.toFXImage(image, null);
+         return new Image(input);
 
       } catch (IOException e) {
          e.printStackTrace();
+         return null;
       }
-      return null;
    }
 }

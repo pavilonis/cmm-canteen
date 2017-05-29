@@ -3,6 +3,7 @@ package lt.pavilonis.scan.monpikas.client;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,8 +38,23 @@ public class App extends Application {
    public void start(Stage stage) throws Exception {
       App.stage = stage;
       new AnnotationConfigApplicationContext(getClass());
-      stage.setScene(new Scene(root, 1440, 900, Color.WHITE));
+      stage.setScene(createScene());
       stage.show();
+   }
+
+   private Scene createScene() {
+      Scene scene = new Scene(root, 1440, 900, Color.WHITE);
+      scene.setOnKeyPressed(event -> {
+         if (event.getCode() == KeyCode.ESCAPE) {
+            stop();
+         }
+      });
+      return scene;
+   }
+
+   @Override
+   public void stop() {
+      System.exit(0);
    }
 
    @Value("${rest.auth.username}")
