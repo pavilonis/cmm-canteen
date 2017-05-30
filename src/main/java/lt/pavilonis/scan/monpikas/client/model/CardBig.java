@@ -149,22 +149,26 @@ public final class CardBig extends Card {
 
    @Override
    protected void decorate(String title, Color color, Object desc) {
+
       super.decorate(title, color, desc);
 
-      ObservableList<Node> container = statusMessagePane.getChildren();
-      container.clear();
+      Platform.runLater(() -> {
 
-      if (response.getStatusCode() == HttpStatus.ACCEPTED) {
-         container.add(iconStatusOk);
-         playSound(playSuccessSoundCmd);
-      } else {
-         container.add(iconStatusReject);
-         playSound(playErrorSoundCmd);
-      }
-      descriptionText.setText(desc.toString());
-      container.add(descriptionText);
+         ObservableList<Node> container = statusMessagePane.getChildren();
+         container.clear();
 
-      gradeText.setText(response.getBody() != null ? response.getBody().getGrade() : "");
+         if (response.getStatusCode() == HttpStatus.ACCEPTED) {
+            container.add(iconStatusOk);
+            playSound(playSuccessSoundCmd);
+         } else {
+            container.add(iconStatusReject);
+            playSound(playErrorSoundCmd);
+         }
+         descriptionText.setText(desc.toString());
+         container.add(descriptionText);
+
+         gradeText.setText(response.getBody() != null ? response.getBody().getGrade() : "");
+      });
    }
 
    private void playSound(String soundCmd) {
