@@ -127,8 +127,10 @@ public abstract class Card extends Group {
    protected void log(String text) {/*should be overridden by big card*/}
 
    protected void decorate(String name, Color color, Object desc) {
-      nameText.setText(name);
-      outerRect.setFill(color);
+      Platform.runLater(() -> {
+         nameText.setText(name);
+         outerRect.setFill(color);
+      });
    }
 
    protected void setPhoto() {
